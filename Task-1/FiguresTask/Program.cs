@@ -1,4 +1,4 @@
-﻿namespace Task_1
+﻿namespace FiguresTask
 {
     internal class Program
     {

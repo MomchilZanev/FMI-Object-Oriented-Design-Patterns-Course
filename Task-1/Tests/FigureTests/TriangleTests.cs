@@ -1,6 +1,6 @@
-using Task_1.Figures;
+using FiguresTask.Figures;
 
-namespace Task_1_Tests.FigureTests
+namespace Tests.FigureTests
 {
     [TestClass]
     public class TriangleTests

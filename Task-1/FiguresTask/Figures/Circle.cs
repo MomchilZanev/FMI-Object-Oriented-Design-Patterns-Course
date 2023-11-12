@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Task_1.Figures
+namespace FiguresTask.Figures
 {
     public class Circle : IFigure, ICloneable
     {

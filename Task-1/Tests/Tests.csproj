@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>Task_1_Tests</RootNamespace>
+    <RootNamespace>Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Task 1\Task 1.csproj" />
+    <ProjectReference Include="..\FiguresTask\FiguresTask.csproj" />
   </ItemGroup>
 
 </Project>

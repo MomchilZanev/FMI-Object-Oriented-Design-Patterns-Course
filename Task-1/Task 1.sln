@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task 1", "Task 1.csproj", "{1D0E3255-EFF5-48A3-A138-7D676431CFAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FiguresTask", "FiguresTask\FiguresTask.csproj", "{1D0E3255-EFF5-48A3-A138-7D676431CFAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task 1 Tests", "..\Task 1 Tests\Task 1 Tests.csproj", "{3E7F35C8-C717-4778-884B-A323EF5FE7A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{3E7F35C8-C717-4778-884B-A323EF5FE7A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

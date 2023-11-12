@@ -1,4 +1,4 @@
-﻿namespace Task_1.Figures
+﻿namespace FiguresTask.Figures
 {
     public interface IFigure
     {
