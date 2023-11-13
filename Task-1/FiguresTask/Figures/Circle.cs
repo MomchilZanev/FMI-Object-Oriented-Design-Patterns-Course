@@ -2,7 +2,7 @@
 
 namespace FiguresTask.Figures
 {
-    public class Circle : IFigure, ICloneable
+    public class Circle : IFigure
     {
         private double r;
 

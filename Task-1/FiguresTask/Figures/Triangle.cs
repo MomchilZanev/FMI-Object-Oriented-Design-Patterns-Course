@@ -2,7 +2,7 @@
 
 namespace FiguresTask.Figures
 {
-    public class Triangle : IFigure, ICloneable
+    public class Triangle : IFigure
     {
         private double a;
         private double b;

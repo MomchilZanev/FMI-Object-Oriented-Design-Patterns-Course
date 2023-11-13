@@ -1,8 +1,8 @@
 ﻿namespace FiguresTask.Figures
 {
-    public interface IFigure
+    public interface IFigure : ICloneable
     {
-        static readonly int DecimalPrecision = 2;
+        const int DecimalPrecision = 2;
 
         double Perimeter();
     }
