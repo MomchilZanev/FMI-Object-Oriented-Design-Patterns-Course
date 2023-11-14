@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace FiguresTask.Factories
 {
-    public class RandomFigureFactory : IFigureFactory
+    public class RandomFigureFactory : FigureFactoryBase
     {
         const double defaultMinThreshold = 0.01;
         const double defaultMaxThreshold = 10.0;
@@ -12,32 +12,27 @@ namespace FiguresTask.Factories
         private double maxThreshold;
         private Random random;
 
-        public RandomFigureFactory(double? minArgumentThreshold, double? maxArgumentThreshold)
+        public RandomFigureFactory(double? minArgumentThreshold, double? maxArgumentThreshold) : base()
         {
             this.minThreshold = minArgumentThreshold ?? defaultMinThreshold;
             this.maxThreshold = maxArgumentThreshold ?? defaultMaxThreshold;
             this.random = new Random();
         }
 
-        public IEnumerable<IFigure> CreateFigures()
+        public override IEnumerable<IFigure> CreateFigures()
         {
-            List<string> validTypes = Assembly.GetExecutingAssembly().GetTypes()
-                                              .Where(t => t.GetInterfaces().Contains(typeof(IFigure)))
-                                              .Select(t => t.FullName ?? t.Name)
-                                              .ToList();
-
             Console.WriteLine("How many figures to create:");
             int count = int.Parse(Console.ReadLine() ?? "");
+
             string? retryType = null;
             for (int i = 0; i < count; ++i)
             {
-                string figureType = retryType ?? validTypes[this.random.Next(0, validTypes.Count)];
+                string figureType = retryType ?? this.validTypes.Keys.ElementAt(this.random.Next(0, base.validTypes.Count)).ToLower();
+                ConstructorInfo? figureCtor = base.GetFigureConstructor(figureType);
 
-                Type? type = Assembly.GetExecutingAssembly().GetType(figureType);
-                if (type is null)
-                    throw new ArgumentException(string.Format("Cannot find type {0}", figureType));
+                if (figureCtor is null)
+                    throw new ArgumentException(string.Format("Cannot find constructor of type \"{0}\"", this.validTypes[figureType]));
 
-                ConstructorInfo figureCtor = type.GetConstructors().First(x => x.GetParameters().Length != 0);
                 object[] arguments = this.getRandomArguments(figureCtor.GetParameters().Length).ToArray();
 
                 // Retry until a valid figure is created using the random parameters (currently only triangle fails)
@@ -48,7 +43,7 @@ namespace FiguresTask.Factories
                 }
                 catch
                 {
-                    retryType = typeof(Triangle).FullName;
+                    retryType = typeof(Triangle).Name.ToLower();
                     --i;
                     continue;
                 }

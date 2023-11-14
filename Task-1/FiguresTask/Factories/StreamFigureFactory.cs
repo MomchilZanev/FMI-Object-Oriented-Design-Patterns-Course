@@ -1,10 +1,8 @@
 ﻿using FiguresTask.Figures;
-using System.Globalization;
-using System.Reflection;
 
 namespace FiguresTask.Factories
 {
-    public class StreamFigureFactory : IFigureFactory
+    public class StreamFigureFactory : FigureFactoryBase
     {
         private TextReader textReader;
 
@@ -13,40 +11,29 @@ namespace FiguresTask.Factories
             this.textReader = textReader;
         }
 
-        public IEnumerable<IFigure> CreateFigures()
+        public override IEnumerable<IFigure> CreateFigures()
         {
-            Console.WriteLine("How many figures to create:");
+            Console.WriteLine("How many figures to read:");
             int count = int.Parse(Console.ReadLine() ?? "");
             while (count > 0)
             {
                 string? line = textReader.ReadLine();
 
-                yield return CreateFigure(line);
+                if (string.IsNullOrEmpty(line)) break;
+
+                yield return this.CreateFigure(line);
                 count--;
             }
         }
 
-        private IFigure CreateFigure(string? input)
+        protected IFigure CreateFigure(string? input)
         {
             List<string> tokens = (input ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-            Dictionary<string, string> validTypes = Assembly.GetExecutingAssembly().GetTypes()
-                                              .Where(t => t.GetInterfaces().Contains(typeof(IFigure)))
-                                              .ToDictionary(t => t.Name.ToLower(), t => t.FullName ?? t.Name);
 
             string figureType = tokens.First().ToLower();
-            object[] arguments = tokens.Skip(1).Select(x => (object)double.Parse(x, CultureInfo.InvariantCulture)).ToArray();
+            object[] arguments = tokens.Skip(1).ToArray();
 
-            if (!validTypes.ContainsKey(figureType))
-                throw new ArgumentException(string.Format("Invalid figure type \"{0}\" passed. Valid types are: [ {1} ]", figureType, string.Join(", ", validTypes)));
-
-
-            Type? type = Assembly.GetExecutingAssembly().GetType(validTypes[figureType]);
-            if (type is null)
-                throw new ArgumentException(string.Format("Cannot find type {0}", validTypes[figureType]));
-
-            ConstructorInfo figureCtor = type.GetConstructor(Enumerable.Repeat(typeof(double), arguments.Length).ToArray());
-
-            return (IFigure)figureCtor.Invoke(arguments);
+            return base.CreateFigure(figureType, arguments);
         }
     }
 }

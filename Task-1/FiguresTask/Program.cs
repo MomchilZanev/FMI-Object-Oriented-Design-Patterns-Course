@@ -15,8 +15,9 @@ namespace FiguresTask
 
             while (true)
             {
+                Console.WriteLine("Choose command. Available options: [ print, delete <index>, duplicate <index>, save-to-file <file-path>]");
                 List<string> commandTokens = (Console.ReadLine() ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                string command = commandTokens[0];
+                string? command = commandTokens.FirstOrDefault();
 
                 switch (command)
                 {
