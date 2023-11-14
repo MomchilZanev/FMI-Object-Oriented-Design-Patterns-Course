@@ -1,52 +1,66 @@
 ﻿using FiguresTask.Figures;
 using System.Globalization;
-using System.Reflection;
 
 namespace FiguresTask.Factories
 {
     public abstract class FigureFactoryBase : IFigureFactory
     {
-        protected Dictionary<string, string> validTypes;
-
-        public FigureFactoryBase()
-        {
-            this.validTypes = Assembly.GetExecutingAssembly()
-                                      .GetTypes()
-                                      .Where(t => t.GetInterfaces().Contains(typeof(IFigure)))
-                                      .ToDictionary(t => t.Name.ToLower(), t => t.FullName ?? t.Name);
-        }
-
         public abstract IEnumerable<IFigure> CreateFigures();
 
-        protected IFigure CreateFigure(string figureType, object[] arguments)
+        protected int PromptFigureCount()
         {
-            if (!this.validTypes.ContainsKey(figureType))
-                throw new ArgumentException(string.Format("Invalid figure type \"{0}\" passed. Valid types are: [ {1} ]", figureType, string.Join(", ", validTypes)));
-
-            ConstructorInfo? figureCtor = this.GetFigureConstructor(figureType, arguments);
-
-            if (figureCtor is null)
-                throw new ArgumentException(string.Format("Cannot find constructor of type \"{0}\" with arguments [ {1} ]", this.validTypes[figureType], string.Join(", ", arguments)));
-
-            // Assuming that all figure constructors have arguments of type 'double'
-            return (IFigure)figureCtor.Invoke(arguments.Select(a => (object)double.Parse((string)a, CultureInfo.InvariantCulture)).ToArray());
+            int count = -1;
+            do
+            {
+                Console.WriteLine("Figure count:");
+            } while (!(int.TryParse(Console.ReadLine(), out count) && count > 0));
+            return count;
         }
 
-        protected ConstructorInfo? GetFigureConstructor(string figureType, object[]? arguments = null)
+        protected IFigure CreateFigure(string figureType, List<string> arguments)
         {
-            Type? type = Assembly.GetExecutingAssembly().GetType(this.validTypes[figureType]);
-            if (type is null)
-                throw new ArgumentException(string.Format("Cannot find type {0}", this.validTypes[figureType]));
+            List<double> parsedArguments = new List<double>();
 
-            if (arguments is null)
+            foreach (string argument in arguments)
             {
-                return type.GetConstructors().FirstOrDefault(x => x.GetParameters().Length != 0);
+                if (double.TryParse(argument, CultureInfo.InvariantCulture, out double parsedArgument))
+                    parsedArguments.Add(parsedArgument);
             }
-            else
+
+            return this.CreateFigure(figureType, parsedArguments);
+        }
+
+        protected IFigure CreateFigure(string figureType, List<double> arguments)
+        {
+            switch (figureType.ToLower())
             {
-                // Assuming that all figure constructors have arguments of type 'double'
-                return type.GetConstructor(Enumerable.Repeat(typeof(double), arguments.Length).ToArray());
+                case "circle":
+                    return this.CreateCircle(arguments);
+                case "rectangle":
+                    return this.CreateRectangle(arguments);
+                case "triangle":
+                    return this.CreateTriangle(arguments);
+                default:
+                    throw new ArgumentException("Invalid figure type.");
             }
+        }
+
+        protected Circle CreateCircle(List<double> arguments)
+        {
+            if (arguments.Count < 1) throw new ArgumentException("Insufficient arguments.");
+            return new Circle(arguments[0]);
+        }
+
+        protected Rectangle CreateRectangle(List<double> arguments)
+        {
+            if (arguments.Count < 2) throw new ArgumentException("Insufficient arguments.");
+            return new Rectangle(arguments[0], arguments[1]);
+        }
+
+        protected Triangle CreateTriangle(List<double> arguments)
+        {
+            if (arguments.Count < 3) throw new ArgumentException("Insufficient arguments.");
+            return new Triangle(arguments[0], arguments[1], arguments[2]);
         }
     }
 }

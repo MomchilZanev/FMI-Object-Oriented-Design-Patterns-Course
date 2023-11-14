@@ -1,10 +1,12 @@
-﻿namespace FiguresTask.Factories
+﻿using System.Globalization;
+
+namespace FiguresTask.Factories
 {
     public static class AbstractFactory
     {
-        public static IFigureFactory Create(string[]? args)
+        public static IFigureFactory Create(List<string> args)
         {
-            if (args == null) throw new ArgumentNullException("args");
+            if (args == null) throw new ArgumentNullException("Invalid input.");
 
             string inputMethod = args[0];
 
@@ -13,12 +15,12 @@
                 case "console":
                     return new StreamFigureFactory(Console.In);
                 case "file":
-                    if (args.Length < 2) throw new ArgumentException("The file input method requires an additional argument - file path.");
-                    string filePath = args[1];
+                    string filePath = args.Count > 2 ? args[1] : @"C:\Temp\input.txt";
+                    if (!File.Exists(filePath)) File.Create(filePath).Close();
                     return new StreamFigureFactory(new StreamReader(filePath));
                 case "random":
-                    double? minThreshold = args.Length > 1 ? double.Parse(args[1]) : null;
-                    double? maxThreshold = args.Length > 2 ? double.Parse(args[2]) : null;
+                    double? minThreshold = args.Count > 1 && double.TryParse(args[1], CultureInfo.InvariantCulture, out double min) ? min : null;
+                    double? maxThreshold = args.Count > 2 && double.TryParse(args[1], CultureInfo.InvariantCulture, out double max) ? max : null;
                     return new RandomFigureFactory(minThreshold, maxThreshold);
                 default:
                     throw new ArgumentException("Invalid input method");

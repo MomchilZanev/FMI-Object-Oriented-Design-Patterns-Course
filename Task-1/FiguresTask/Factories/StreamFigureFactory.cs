@@ -13,27 +13,33 @@ namespace FiguresTask.Factories
 
         public override IEnumerable<IFigure> CreateFigures()
         {
-            Console.WriteLine("How many figures to read:");
-            int count = int.Parse(Console.ReadLine() ?? "");
-            while (count > 0)
+            int count = base.PromptFigureCount();
+            for (int i = 0; i < count; ++i)
             {
                 string? line = textReader.ReadLine();
 
-                if (string.IsNullOrEmpty(line)) break;
+                if (this.ValidateInput(line, out List<string> tokens))
+                {
+                    IFigure? figure = null;
 
-                yield return this.CreateFigure(line);
-                count--;
+                    try { figure = base.CreateFigure(tokens.First(), tokens.Skip(1).ToList()); }
+                    catch (ArgumentException) { continue; } // Argument exceptions expected, continue reading
+
+                    yield return figure;
+                }
             }
         }
 
-        protected IFigure CreateFigure(string? input)
+        private bool ValidateInput(string? input, out List<string> tokens)
         {
-            List<string> tokens = (input ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+            if (string.IsNullOrEmpty(input))
+            {
+                tokens = new List<string>();
+                return false;
+            }
 
-            string figureType = tokens.First().ToLower();
-            object[] arguments = tokens.Skip(1).ToArray();
-
-            return base.CreateFigure(figureType, arguments);
+            tokens = input.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+            return tokens.Count > 0;
         }
     }
 }

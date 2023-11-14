@@ -1,5 +1,5 @@
 ﻿using FiguresTask.Figures;
-using System.Reflection;
+using System.Collections.Immutable;
 
 namespace FiguresTask.Factories
 {
@@ -8,12 +8,16 @@ namespace FiguresTask.Factories
         const double defaultMinThreshold = 0.01;
         const double defaultMaxThreshold = 10.0;
 
-        private double minThreshold;
-        private double maxThreshold;
-        private Random random;
+        private readonly ImmutableList<string> figureTypes;
+        private readonly ImmutableList<string> specialFigureTypes;
+        private readonly double minThreshold;
+        private readonly double maxThreshold;
+        private readonly Random random;
 
         public RandomFigureFactory(double? minArgumentThreshold, double? maxArgumentThreshold) : base()
         {
+            this.figureTypes = ImmutableList.Create("circle", "rectangle", "triangle");
+            this.specialFigureTypes = ImmutableList.Create("triangle");
             this.minThreshold = minArgumentThreshold ?? defaultMinThreshold;
             this.maxThreshold = maxArgumentThreshold ?? defaultMaxThreshold;
             this.random = new Random();
@@ -21,43 +25,44 @@ namespace FiguresTask.Factories
 
         public override IEnumerable<IFigure> CreateFigures()
         {
-            Console.WriteLine("How many figures to create:");
-            int count = int.Parse(Console.ReadLine() ?? "");
-
-            string? retryType = null;
+            int count = base.PromptFigureCount();
             for (int i = 0; i < count; ++i)
             {
-                string figureType = retryType ?? this.validTypes.Keys.ElementAt(this.random.Next(0, base.validTypes.Count)).ToLower();
-                ConstructorInfo? figureCtor = base.GetFigureConstructor(figureType);
-
-                if (figureCtor is null)
-                    throw new ArgumentException(string.Format("Cannot find constructor of type \"{0}\"", this.validTypes[figureType]));
-
-                object[] arguments = this.getRandomArguments(figureCtor.GetParameters().Length).ToArray();
-
-                // Retry until a valid figure is created using the random parameters (currently only triangle fails)
-                IFigure figure;
-                try
-                {
-                    figure = (IFigure)figureCtor.Invoke(arguments);
-                }
-                catch
-                {
-                    retryType = typeof(Triangle).Name.ToLower();
-                    --i;
-                    continue;
-                }
-                retryType = null;
-                yield return figure;
+                string figureType = this.figureTypes.ElementAt(this.random.Next(0, this.figureTypes.Count));
+                yield return this.CreateFigure(figureType);
             }
         }
 
-        private IEnumerable<object> getRandomArguments(int count)
+        protected IFigure CreateFigure(string figureType)
+        {
+            switch (figureType)
+            {
+                case "circle":
+                    return base.CreateCircle(new List<double> { this.getRandomDouble(this.minThreshold, this.maxThreshold) });
+                case "rectangle":
+                    return base.CreateRectangle(this.getRandomArguments(2).ToList());
+                case "triangle":
+                    List<double> triangleArgs = this.getRandomArguments(2).ToList();
+                    double lowerBound = Math.Max(triangleArgs[0] - triangleArgs[1], triangleArgs[1] - triangleArgs[0]);
+                    double upperBound = Math.Min(triangleArgs[0] + triangleArgs[1], this.maxThreshold);
+                    triangleArgs.Add(this.getRandomDouble(lowerBound, upperBound));
+                    return base.CreateTriangle(triangleArgs);
+                default:
+                    throw new ArgumentException("Invalid figure type.");
+            }
+        }
+
+        private IEnumerable<double> getRandomArguments(int count)
         {
             for (int i = 0; i < count; ++i)
             {
-                yield return this.random.NextDouble() * (this.maxThreshold - this.minThreshold) + this.minThreshold;
+                yield return this.getRandomDouble(this.minThreshold, this.maxThreshold);
             }
+        }
+
+        private double getRandomDouble(double min, double max)
+        {
+            return this.random.NextDouble() * (max - min) + min;
         }
     }
 }

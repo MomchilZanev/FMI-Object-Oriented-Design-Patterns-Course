@@ -59,7 +59,7 @@ namespace FiguresTask.Figures
             return current.SequenceEqual(other);
         }
 
-        private static bool AreValidTriangleSides(double a, double b, double c)
+        public static bool AreValidTriangleSides(double a, double b, double c)
         {
             return a > 0
                 && b > 0

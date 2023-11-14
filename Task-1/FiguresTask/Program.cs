@@ -7,38 +7,41 @@ namespace FiguresTask
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Choose input method. Available options: [ console, file, random ]");
-            string[] tokens = (Console.ReadLine() ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            List<string> tokens = new List<string>();
+
+            do
+            {
+                Console.WriteLine("Choose input method. [ console, file <file-path>, random <min-threshold = 0.01> <max-threshold = 10>]");
+                tokens = (Console.ReadLine() ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+            } while (tokens.Count < 1);
 
             IFigureFactory factory = AbstractFactory.Create(tokens);
             List<IFigure> figures = factory.CreateFigures().ToList();
 
             while (true)
             {
-                Console.WriteLine("Choose command. Available options: [ print, delete <index>, duplicate <index>, save-to-file <file-path>]");
+                Console.WriteLine("Choose command. [ print, delete <index>, duplicate <index>, save-file <file-path>]");
                 List<string> commandTokens = (Console.ReadLine() ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
                 string? command = commandTokens.FirstOrDefault();
 
                 switch (command)
                 {
                     case "print":
-                        foreach (IFigure figure in figures)
-                        {
-                            Console.WriteLine(figure);
-                        }
+                        Console.WriteLine(string.Join(Environment.NewLine, figures));
                         break;
                     case "delete":
-                        figures.RemoveAt(int.Parse(commandTokens[1]));
+                        if (commandTokens.Count > 1 && int.TryParse(commandTokens[1], out int deleteIindex))
+                            figures.RemoveAt(deleteIindex);
                         break;
                     case "duplicate":
-                        figures.Add((IFigure)figures[int.Parse(commandTokens[1])].Clone());
+                        if (commandTokens.Count > 1 && int.TryParse(commandTokens[1], out int duplicateIindex))
+                            figures.Add((IFigure)figures[duplicateIindex].Clone());
                         break;
-                    case "save-to-file":
-                        StreamWriter streamWriter = new StreamWriter(commandTokens[1]);
-                        streamWriter.AutoFlush = true;
-                        foreach (IFigure figure in figures)
+                    case "save-file":
+                        if (commandTokens.Count > 1)
                         {
-                            streamWriter.WriteLine(figure);
+                            StreamWriter streamWriter = new StreamWriter(commandTokens[1]) { AutoFlush = true };
+                            streamWriter.WriteLine(string.Join(Environment.NewLine, figures));
                         }
                         break;
                     default:
