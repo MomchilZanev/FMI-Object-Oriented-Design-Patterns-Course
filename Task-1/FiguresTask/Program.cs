@@ -27,27 +27,38 @@ namespace FiguresTask
                 switch (command)
                 {
                     case "print":
-                        Console.WriteLine(string.Join(Environment.NewLine, figures));
+                        printFigures(Console.Out, figures);
                         break;
                     case "delete":
-                        if (commandTokens.Count > 1 && int.TryParse(commandTokens[1], out int deleteIindex))
+                        if (commandTokens.Count > 1
+                            && int.TryParse(commandTokens[1], out int deleteIindex)
+                            && deleteIindex > 0
+                            && figures.Count > deleteIindex)
                             figures.RemoveAt(deleteIindex);
                         break;
                     case "duplicate":
-                        if (commandTokens.Count > 1 && int.TryParse(commandTokens[1], out int duplicateIindex))
+                        if (commandTokens.Count > 1
+                            && int.TryParse(commandTokens[1], out int duplicateIindex)
+                            && duplicateIindex > 0
+                            && figures.Count > duplicateIindex)
                             figures.Add((IFigure)figures[duplicateIindex].Clone());
                         break;
                     case "save-file":
                         if (commandTokens.Count > 1)
                         {
                             StreamWriter streamWriter = new StreamWriter(commandTokens[1]) { AutoFlush = true };
-                            streamWriter.WriteLine(string.Join(Environment.NewLine, figures));
+                            printFigures(streamWriter, figures);
                         }
                         break;
                     default:
                         return;
                 }
             }
+        }
+
+        private static void printFigures(TextWriter textWriter, List<IFigure> figures)
+        {
+            textWriter.WriteLine(string.Join(Environment.NewLine, figures));
         }
     }
 }

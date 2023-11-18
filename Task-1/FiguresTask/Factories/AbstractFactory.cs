@@ -15,7 +15,7 @@ namespace FiguresTask.Factories
                 case "console":
                     return new StreamFigureFactory(Console.In);
                 case "file":
-                    string filePath = args.Count > 2 ? args[1] : @"C:\Temp\input.txt";
+                    string filePath = args.Count > 2 ? args[1] : Path.Combine(Directory.GetCurrentDirectory(), "dummy-input.txt");
                     if (!File.Exists(filePath)) File.Create(filePath).Close();
                     return new StreamFigureFactory(new StreamReader(filePath));
                 case "random":

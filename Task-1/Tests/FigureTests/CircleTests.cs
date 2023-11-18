@@ -1,4 +1,5 @@
 using FiguresTask.Figures;
+using System.Globalization;
 
 namespace Tests.FigureTests
 {
@@ -29,7 +30,7 @@ namespace Tests.FigureTests
 
             Circle circle = new Circle(r);
 
-            Assert.AreEqual(6.28, circle.Perimeter());
+            Assert.AreEqual(Math.Round(2.0 * Math.PI * r, IFigure.DecimalPrecision), circle.Perimeter());
         }
 
         [TestMethod]
@@ -39,7 +40,7 @@ namespace Tests.FigureTests
 
             Circle circle = new Circle(r);
 
-            Assert.AreEqual(17.40, circle.Perimeter());
+            Assert.AreEqual(Math.Round(2.0 * Math.PI * r, IFigure.DecimalPrecision), circle.Perimeter());
         }
 
         [TestMethod]
@@ -49,7 +50,8 @@ namespace Tests.FigureTests
 
             Circle circle = new Circle(r);
 
-            Assert.AreEqual("circle 1.00", circle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "circle {0:F}", r);
+            Assert.AreEqual(expectedString, circle.ToString());
         }
 
         [TestMethod]
@@ -59,7 +61,8 @@ namespace Tests.FigureTests
 
             Circle circle = new Circle(r);
 
-            Assert.AreEqual("circle 2.77", circle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "circle {0:F}", r);
+            Assert.AreEqual(expectedString, circle.ToString());
         }
     }
 }

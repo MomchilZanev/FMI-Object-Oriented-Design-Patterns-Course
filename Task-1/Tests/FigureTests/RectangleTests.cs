@@ -1,4 +1,5 @@
 using FiguresTask.Figures;
+using System.Globalization;
 
 namespace Tests.FigureTests
 {
@@ -40,7 +41,7 @@ namespace Tests.FigureTests
 
             Rectangle rectangle = new Rectangle(a, b);
 
-            Assert.AreEqual(6, rectangle.Perimeter());
+            Assert.AreEqual(Math.Round(2 * (a + b), IFigure.DecimalPrecision), rectangle.Perimeter());
         }
 
         [TestMethod]
@@ -51,7 +52,7 @@ namespace Tests.FigureTests
 
             Rectangle rectangle = new Rectangle(a, b);
 
-            Assert.AreEqual(6.66, rectangle.Perimeter());
+            Assert.AreEqual(Math.Round(2 * (a + b), IFigure.DecimalPrecision), rectangle.Perimeter());
         }
 
         [TestMethod]
@@ -62,7 +63,8 @@ namespace Tests.FigureTests
 
             Rectangle rectangle = new Rectangle(a, b);
 
-            Assert.AreEqual("rectangle 1.00 2.00", rectangle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "rectangle {0:F} {1:F}", a, b);
+            Assert.AreEqual(expectedString, rectangle.ToString());
         }
 
         [TestMethod]
@@ -73,7 +75,8 @@ namespace Tests.FigureTests
 
             Rectangle rectangle = new Rectangle(a, b);
 
-            Assert.AreEqual("rectangle 2.14 0.12", rectangle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "rectangle {0:F} {1:F}", a, b);
+            Assert.AreEqual(expectedString, rectangle.ToString());
         }
     }
 }

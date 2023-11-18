@@ -21,4 +21,10 @@
     <ProjectReference Include="..\FiguresTask\FiguresTask.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="test-input.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

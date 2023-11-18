@@ -5,15 +5,17 @@ namespace FiguresTask.Factories
     public class StreamFigureFactory : FigureFactoryBase
     {
         private TextReader textReader;
+        private readonly int? count;
 
-        public StreamFigureFactory(TextReader textReader)
+        public StreamFigureFactory(TextReader textReader, int? count = null)
         {
             this.textReader = textReader;
+            this.count = count;
         }
 
         public override IEnumerable<IFigure> CreateFigures()
         {
-            int count = base.PromptFigureCount();
+            int count = this.count ?? base.PromptFigureCount();
             for (int i = 0; i < count; ++i)
             {
                 string? line = textReader.ReadLine();

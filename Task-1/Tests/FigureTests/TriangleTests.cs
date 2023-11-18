@@ -1,4 +1,6 @@
 using FiguresTask.Figures;
+using System.Drawing;
+using System.Globalization;
 
 namespace Tests.FigureTests
 {
@@ -44,7 +46,7 @@ namespace Tests.FigureTests
 
             Triangle triangle = new Triangle(a, b, c);
 
-            Assert.AreEqual(5, triangle.Perimeter());
+            Assert.AreEqual(Math.Round(a + b + c, IFigure.DecimalPrecision), triangle.Perimeter());
         }
 
         [TestMethod]
@@ -56,7 +58,7 @@ namespace Tests.FigureTests
 
             Triangle triangle = new Triangle(a, b, c);
 
-            Assert.AreEqual(5.55, triangle.Perimeter());
+            Assert.AreEqual(Math.Round(a + b + c, IFigure.DecimalPrecision), triangle.Perimeter());
         }
 
         [TestMethod]
@@ -68,7 +70,8 @@ namespace Tests.FigureTests
 
             Triangle triangle = new Triangle(a, b, c);
 
-            Assert.AreEqual("triangle 1.00 2.00 2.00", triangle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "triangle {0:F} {1:F} {2:F}", a, b, c);
+            Assert.AreEqual(expectedString, triangle.ToString());
         }
 
         [TestMethod]
@@ -80,19 +83,21 @@ namespace Tests.FigureTests
 
             Triangle triangle = new Triangle(a, b, c);
 
-            Assert.AreEqual("triangle 2.00 1.00 2.00", triangle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "triangle {0:F} {1:F} {2:F}", a, b, c);
+            Assert.AreEqual(expectedString, triangle.ToString());
         }
 
         [TestMethod]
         public void TriangleToStringTest_3()
         {
-            double a = 2.22;
-            double b = 2.22;
-            double c = 1.11;
+            double a = 2.223412412412412;
+            double b = 2.2219834715239451934;
+            double c = 1.1401934712391;
 
             Triangle triangle = new Triangle(a, b, c);
 
-            Assert.AreEqual("triangle 2.22 2.22 1.11", triangle.ToString());
+            string expectedString = string.Format(new NumberFormatInfo() { NumberDecimalDigits = IFigure.DecimalPrecision }, "triangle {0:F} {1:F} {2:F}", a, b, c);
+            Assert.AreEqual(expectedString, triangle.ToString());
         }
     }
 }
