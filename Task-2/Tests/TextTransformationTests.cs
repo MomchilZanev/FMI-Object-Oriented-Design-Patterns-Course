@@ -11,7 +11,7 @@ namespace Tests
             string text = "abcDEF123";
             string capitalizedText = "AbcDEF123";
 
-            CapitalizeTransformation transformation = new CapitalizeTransformation();
+            ITextTransformation transformation = new CapitalizeTransformation();
 
             Assert.AreEqual(capitalizedText, transformation.Transform(text));
         }
@@ -21,7 +21,7 @@ namespace Tests
         {
             string text = "AbcDEF123";
 
-            CapitalizeTransformation transformation = new CapitalizeTransformation();
+            ITextTransformation transformation = new CapitalizeTransformation();
 
             Assert.AreEqual(text, transformation.Transform(text));
         }
@@ -33,7 +33,7 @@ namespace Tests
             string text2 = "!abcDEF123";
             string text3 = "0abcDEF123";
 
-            CapitalizeTransformation transformation = new CapitalizeTransformation();
+            ITextTransformation transformation = new CapitalizeTransformation();
 
             Assert.AreEqual(text1, transformation.Transform(text1));
             Assert.AreEqual(text2, transformation.Transform(text2));
@@ -43,7 +43,7 @@ namespace Tests
         [TestMethod]
         public void CapitalizeTransformationTest_4_ReturnsEmptyIfNullIsGiven()
         {
-            CapitalizeTransformation transformation = new CapitalizeTransformation();
+            ITextTransformation transformation = new CapitalizeTransformation();
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }
@@ -60,7 +60,7 @@ namespace Tests
             string text3 = "     abc 123  ";
             string text3Trimmed = "abc 123  ";
 
-            TrimLeftTransformation transformation = new TrimLeftTransformation();
+            ITextTransformation transformation = new TrimLeftTransformation();
 
             Assert.AreEqual(text1Trimmed, transformation.Transform(text1));
             Assert.AreEqual(text2Trimmed, transformation.Transform(text2));
@@ -72,7 +72,7 @@ namespace Tests
         {
             string text = "abc 123 ";
 
-            TrimLeftTransformation transformation = new TrimLeftTransformation();
+            ITextTransformation transformation = new TrimLeftTransformation();
 
             Assert.AreEqual(text, transformation.Transform(text));
         }
@@ -80,7 +80,7 @@ namespace Tests
         [TestMethod]
         public void TrimLeftTransformationTest_3_ReturnsEmptyIfNullIsGiven()
         {
-            TrimLeftTransformation transformation = new TrimLeftTransformation();
+            ITextTransformation transformation = new TrimLeftTransformation();
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }
@@ -97,7 +97,7 @@ namespace Tests
             string text3 = "     abc 123      ";
             string text3Trimmed = "     abc 123";
 
-            TrimRightTransformation transformation = new TrimRightTransformation();
+            ITextTransformation transformation = new TrimRightTransformation();
 
             Assert.AreEqual(text1Trimmed, transformation.Transform(text1));
             Assert.AreEqual(text2Trimmed, transformation.Transform(text2));
@@ -109,7 +109,7 @@ namespace Tests
         {
             string text = "     abc 123";
 
-            TrimRightTransformation transformation = new TrimRightTransformation();
+            ITextTransformation transformation = new TrimRightTransformation();
 
             Assert.AreEqual(text, transformation.Transform(text));
         }
@@ -117,7 +117,7 @@ namespace Tests
         [TestMethod]
         public void TrimRightTransformationTest_3_ReturnsEmptyIfNullIsGiven()
         {
-            TrimRightTransformation transformation = new TrimRightTransformation();
+            ITextTransformation transformation = new TrimRightTransformation();
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }
@@ -128,7 +128,7 @@ namespace Tests
             string text = "     abc   123   _ - _  ";
             string normalizedText = " abc 123 _ - _ ";
 
-            NormalizeSpaceTransformation transformation = new NormalizeSpaceTransformation();
+            ITextTransformation transformation = new NormalizeSpaceTransformation();
 
             Assert.AreEqual(normalizedText, transformation.Transform(text));
         }
@@ -138,7 +138,7 @@ namespace Tests
         {
             string text = "abc 123";
 
-            NormalizeSpaceTransformation transformation = new NormalizeSpaceTransformation();
+            ITextTransformation transformation = new NormalizeSpaceTransformation();
 
             Assert.AreEqual(text, transformation.Transform(text));
         }
@@ -146,7 +146,7 @@ namespace Tests
         [TestMethod]
         public void NormalizeSpaceTransformationTest_3_ReturnsEmptyIfNullIsGiven()
         {
-            NormalizeSpaceTransformation transformation = new NormalizeSpaceTransformation();
+            ITextTransformation transformation = new NormalizeSpaceTransformation();
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }
@@ -157,7 +157,7 @@ namespace Tests
             string text = "abc 123";
             string decoratedText = "-={ abc 123 }=-";
 
-            DecorateTransformation transformation = new DecorateTransformation();
+            ITextTransformation transformation = new DecorateTransformation();
 
             Assert.AreEqual(decoratedText, transformation.Transform(text));
         }
@@ -168,7 +168,7 @@ namespace Tests
             string text = "     abc 123  ";
             string decoratedText = "-={ abc 123 }=-";
 
-            DecorateTransformation transformation = new DecorateTransformation();
+            ITextTransformation transformation = new DecorateTransformation();
 
             Assert.AreEqual(decoratedText, transformation.Transform(text));
         }
@@ -182,7 +182,7 @@ namespace Tests
 
             string decoratedText = "-={ }=-";
 
-            DecorateTransformation transformation = new DecorateTransformation();
+            ITextTransformation transformation = new DecorateTransformation();
 
             Assert.AreEqual(decoratedText, transformation.Transform(empty));
             Assert.AreEqual(decoratedText, transformation.Transform(whiteSpace));
@@ -194,7 +194,7 @@ namespace Tests
         {
             string decoratedText = "-={ }=-";
 
-            DecorateTransformation transformation = new DecorateTransformation();
+            ITextTransformation transformation = new DecorateTransformation();
 
             Assert.AreEqual(decoratedText, transformation.Transform(null));
         }
@@ -207,7 +207,7 @@ namespace Tests
             string text = " abc 123 aBc ABCdef aabcc";
             string replacedText = " 0 123 aBc ABCdef a0c";
 
-            ReplaceTransformation transformation = new ReplaceTransformation(a, b);
+            ITextTransformation transformation = new ReplaceTransformation(a, b);
 
             Assert.AreEqual(replacedText, transformation.Transform(text));
         }
@@ -218,8 +218,8 @@ namespace Tests
             string b = "0";
             string text = " abc 123 aBc ABCdef aabcc";
 
-            ReplaceTransformation transformation1 = new ReplaceTransformation(string.Empty, b);
-            ReplaceTransformation transformation2 = new ReplaceTransformation(null, b);
+            ITextTransformation transformation1 = new ReplaceTransformation(string.Empty, b);
+            ITextTransformation transformation2 = new ReplaceTransformation(null, b);
 
             Assert.AreEqual(text, transformation1.Transform(text));
             Assert.AreEqual(text, transformation2.Transform(text));
@@ -232,8 +232,8 @@ namespace Tests
             string text = " abc 123 aBc ABCdef aabcc";
             string replacedText = "  123 aBc ABCdef ac";
 
-            ReplaceTransformation transformation1 = new ReplaceTransformation(a, string.Empty);
-            ReplaceTransformation transformation2 = new ReplaceTransformation(a, null);
+            ITextTransformation transformation1 = new ReplaceTransformation(a, string.Empty);
+            ITextTransformation transformation2 = new ReplaceTransformation(a, null);
 
             Assert.AreEqual(replacedText, transformation1.Transform(text));
             Assert.AreEqual(replacedText, transformation2.Transform(text));
@@ -245,7 +245,7 @@ namespace Tests
             string a = "abc";
             string b = "0";
 
-            ReplaceTransformation transformation = new ReplaceTransformation(a, b);
+            ITextTransformation transformation = new ReplaceTransformation(a, b);
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }
@@ -257,7 +257,7 @@ namespace Tests
             string text = "abc AbC aabbcc abcabc 123 DEF";
             string censoredText = "*** AbC aabbcc ****** 123 DEF";
 
-            CensorTransformation transformation = new CensorTransformation(w);
+            ITextTransformation transformation = new CensorTransformation(w);
 
             Assert.AreEqual(censoredText, transformation.Transform(text));
         }
@@ -267,8 +267,8 @@ namespace Tests
         {
             string text = "abc AbC aabbcc abcabc 123 DEF";
 
-            CensorTransformation transformation1 = new CensorTransformation(string.Empty);
-            CensorTransformation transformation2 = new CensorTransformation(null);
+            ITextTransformation transformation1 = new CensorTransformation(string.Empty);
+            ITextTransformation transformation2 = new CensorTransformation(null);
 
             Assert.AreEqual(text, transformation1.Transform(text));
             Assert.AreEqual(text, transformation2.Transform(text));
@@ -279,7 +279,7 @@ namespace Tests
         {
             string w = "abc";
 
-            CensorTransformation transformation = new CensorTransformation(w);
+            ITextTransformation transformation = new CensorTransformation(w);
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }

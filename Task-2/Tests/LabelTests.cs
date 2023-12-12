@@ -10,7 +10,7 @@ namespace Tests
         {
             string text = "Simple label test.";
 
-            SimpleLabel label = new SimpleLabel(text);
+            ILabel label = new SimpleLabel(text);
 
             Assert.AreEqual(text, label.GetText());
         }
@@ -20,7 +20,7 @@ namespace Tests
         {
             string text = "";
 
-            SimpleLabel label = new SimpleLabel(text);
+            ILabel label = new SimpleLabel(text);
 
             Assert.AreEqual(string.Empty, label.GetText());
         }
@@ -28,7 +28,7 @@ namespace Tests
         [TestMethod]
         public void SimpleLabelTest_3_NullValue()
         {
-            SimpleLabel label = new SimpleLabel(null);
+            ILabel label = new SimpleLabel(null);
 
             Assert.AreEqual(string.Empty, label.GetText());
         }
@@ -41,23 +41,23 @@ namespace Tests
             int size = 12;
             string font = "Tahoma";
 
-            RichLabel richLabel = new RichLabel(text, color, size, font);
+            ILabel richLabel = new RichLabel(text, color, size, font);
 
             Assert.AreEqual(text, richLabel.GetText());
-            Assert.AreEqual(color, richLabel.Style.Color);
-            Assert.AreEqual(size, richLabel.Style.Size);
-            Assert.AreEqual(font, richLabel.Style.Font);
+            Assert.AreEqual(color, ((RichLabel)richLabel).Style.Color);
+            Assert.AreEqual(size, ((RichLabel)richLabel).Style.Size);
+            Assert.AreEqual(font, ((RichLabel)richLabel).Style.Font);
         }
 
         [TestMethod]
         public void RichLabelTest_2_DefaultValues()
         {
-            RichLabel richLabel = new RichLabel(null, null, -10, null);
+            ILabel richLabel = new RichLabel(null, null, -10, null);
 
             Assert.AreEqual(string.Empty, richLabel.GetText());
-            Assert.AreEqual("Black", richLabel.Style.Color);
-            Assert.AreEqual(1, richLabel.Style.Size);
-            Assert.AreEqual("Arial", richLabel.Style.Font);
+            Assert.AreEqual("Black", ((RichLabel)richLabel).Style.Color);
+            Assert.AreEqual(1, ((RichLabel)richLabel).Style.Size);
+            Assert.AreEqual("Arial", ((RichLabel)richLabel).Style.Font);
         }
     }
 }
