@@ -283,5 +283,60 @@ namespace Tests
 
             Assert.AreEqual(string.Empty, transformation.Transform(null));
         }
+
+        [TestMethod]
+        public void TextTransformationEqualitiTest()
+        {
+            Assert.AreEqual(new CapitalizeTransformation(), new CapitalizeTransformation());
+            Assert.AreEqual(new TrimLeftTransformation(), new TrimLeftTransformation());
+            Assert.AreEqual(new TrimRightTransformation(), new TrimRightTransformation());
+            Assert.AreEqual(new NormalizeSpaceTransformation(), new NormalizeSpaceTransformation());
+            Assert.AreEqual(new DecorateTransformation(), new DecorateTransformation());
+            Assert.AreEqual(new CensorTransformation("asd"), new CensorTransformation("asd"));
+            Assert.AreEqual(new CensorTransformation(""), new CensorTransformation(""));
+            Assert.AreEqual(new CensorTransformation(""), new CensorTransformation(null));
+            Assert.AreEqual(new CensorTransformation(null), new CensorTransformation(null));
+            Assert.AreEqual(new ReplaceTransformation("ab", "cd"), new ReplaceTransformation("ab", "cd"));
+            Assert.AreEqual(new ReplaceTransformation("", ""), new ReplaceTransformation("", ""));
+            Assert.AreEqual(new ReplaceTransformation("", ""), new ReplaceTransformation(null, null));
+            Assert.AreEqual(new ReplaceTransformation(null, null), new ReplaceTransformation(null, null));
+        }
+
+        [TestMethod]
+        public void TextTransformationInEqualitiTest()
+        {
+            List<ITextTransformation> transformations = new List<ITextTransformation>()
+            {
+                new CapitalizeTransformation(),
+                new TrimLeftTransformation(),
+                new TrimRightTransformation(),
+                new NormalizeSpaceTransformation(),
+                new DecorateTransformation(),
+                new CensorTransformation("asd"),
+                new ReplaceTransformation("ab","cd")
+            };
+
+            for (int i = 0; i < transformations.Count; ++i)
+            {
+                for (int j = 0; j < transformations.Count; ++j)
+                {
+                    if (i == j)
+                        continue;
+
+                    Assert.AreNotEqual(transformations[i], transformations[j]);
+                }
+            }
+
+            Assert.AreNotEqual(new CensorTransformation("a"), new CensorTransformation("b"));
+            Assert.AreNotEqual(new CensorTransformation("a"), new CensorTransformation(" a "));
+            Assert.AreNotEqual(new CensorTransformation("asd"), new CensorTransformation("ASD"));
+
+            Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("b", "a"));
+            Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("a", "c"));
+            Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("c", "b"));
+            Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation(" a ", " b "));
+            Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("A", "B"));
+            Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("A", "B"));
+        }
     }
 }

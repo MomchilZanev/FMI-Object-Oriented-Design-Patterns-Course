@@ -16,5 +16,10 @@
 
             return text ?? string.Empty;
         }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && typeof(CapitalizeTransformation) == obj.GetType();
+        }
     }
 }

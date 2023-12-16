@@ -23,5 +23,10 @@
 
             return result;
         }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && typeof(DecorateTransformation) == obj.GetType();
+        }
     }
 }

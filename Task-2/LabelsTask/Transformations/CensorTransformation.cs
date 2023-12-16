@@ -23,5 +23,15 @@
 
             return text ?? string.Empty;
         }
+
+        public override bool Equals(object? obj)
+        {
+            if(obj is null || typeof(CensorTransformation) != obj.GetType())
+                return false;
+
+            CensorTransformation transformationToCompare = (CensorTransformation)obj;
+
+            return this.w == transformationToCompare.w;
+        }
     }
 }

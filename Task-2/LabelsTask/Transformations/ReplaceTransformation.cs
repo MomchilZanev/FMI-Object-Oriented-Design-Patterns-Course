@@ -23,5 +23,15 @@
 
             return text ?? string.Empty;
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null || typeof(ReplaceTransformation) != obj.GetType())
+                return false;
+
+            ReplaceTransformation transformationToCompare = (ReplaceTransformation)obj;
+
+            return this.a == transformationToCompare.a && this.b == transformationToCompare.b;
+        }
     }
 }

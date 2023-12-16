@@ -13,5 +13,10 @@ namespace LabelsTask.Transformations
 
             return text ?? string.Empty;
         }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && typeof(NormalizeSpaceTransformation) == obj.GetType();
+        }
     }
 }

@@ -6,5 +6,10 @@
         {
             return (text ?? string.Empty).TrimStart();
         }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is not null && typeof(TrimLeftTransformation) == obj.GetType();
+        }
     }
 }
