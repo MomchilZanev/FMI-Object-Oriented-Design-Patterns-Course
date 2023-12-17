@@ -13,7 +13,7 @@ namespace LabelsTask.Labels
         public CustomLabel(int timeout = -1)
         {
             this.labelFactory = new StreamLabelFactory(Console.In, Console.Out);
-            this.timeout = timeout;
+            this.timeout = timeout < -1 ? -1 : timeout;
             this.callsRemaining = timeout;
         }
 

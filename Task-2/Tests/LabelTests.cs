@@ -105,6 +105,20 @@ namespace Tests
         }
 
         [TestMethod]
+        public void CustomLabelTest_3_NegativeTimeoutWorksAsNoTimeout()
+        {
+            string text = "Label value";
+
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", text, "simple", "label that will never be read" })));
+            CustomLabel label = new CustomLabel(-5);
+
+            for (int i = 0; i < 100; ++i)
+            {
+                Assert.AreEqual(text, label.GetText());
+            }
+        }
+
+        [TestMethod]
         public void HelpLabelTest_1()
         {
             string text = "Label value";

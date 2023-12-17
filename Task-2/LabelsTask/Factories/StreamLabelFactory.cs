@@ -13,7 +13,7 @@ namespace LabelsTask.Factories
         {
             this.textReader = textReader;
             this.textWriter = textWriter;
-            this.availableTypes = new List<string>() { "simple", "rich" };
+            this.availableTypes = new List<string>() { "simple", "rich", "custom", "help" };
             this.informationPrompt = string.Format("Create a label.\nAvailable types: [ {0} ]\nChoose label type.", string.Join(", ", this.availableTypes));
         }
 
@@ -30,6 +30,10 @@ namespace LabelsTask.Factories
                         return this.CreateSimpleLabel();
                     case "rich":
                         return this.CreateRichLabel();
+                    case "custom":
+                        return this.CreateCustomLabel();
+                    case "help":
+                        return this.CreateHelpLabel();
                     default:
                         throw new ArgumentException();
                 }
@@ -41,7 +45,7 @@ namespace LabelsTask.Factories
             }
         }
 
-        public ILabel CreateSimpleLabel()
+        private ILabel CreateSimpleLabel()
         {
             this.textWriter.WriteLine("Creating simple label.\nChose value:");
             string value = this.textReader.ReadLine() ?? string.Empty;
@@ -49,7 +53,7 @@ namespace LabelsTask.Factories
             return new SimpleLabel(value);
         }
 
-        public ILabel CreateRichLabel()
+        private ILabel CreateRichLabel()
         {
             this.textWriter.WriteLine("Creating rich label.\nChose value:");
             string value = this.textReader.ReadLine() ?? string.Empty;
@@ -64,6 +68,25 @@ namespace LabelsTask.Factories
             string font = this.textReader.ReadLine() ?? string.Empty;
 
             return new RichLabel(value, color, size, font);
+        }
+
+        private ILabel CreateCustomLabel()
+        {
+            this.textWriter.WriteLine("Creating custom label.\nChoose timeout:");
+            int timeout = int.TryParse(this.textReader.ReadLine(), out int result) ? result : -1;
+
+            return new CustomLabel(timeout);
+        }
+
+        private ILabel CreateHelpLabel()
+        {
+            this.textWriter.WriteLine("Creating help label.\nChoose help text:");
+            string helpText = this.textReader.ReadLine() ?? string.Empty;
+
+            this.textWriter.WriteLine("Create base label:");
+            ILabel innerLabel = this.CreateLabel();
+
+            return new HelpLabel(helpText, innerLabel);
         }
     }
 }

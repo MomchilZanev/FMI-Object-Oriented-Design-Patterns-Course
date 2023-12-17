@@ -6,7 +6,7 @@ namespace LabelsTask
     {
         public static void Print(ILabel label)
         {
-            Console.WriteLine(label.GetText());
+            Console.WriteLine("Label: " + label.GetText());
         }
 
         public static void PrintWithHelpText(HelpLabel label)
