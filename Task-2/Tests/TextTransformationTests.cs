@@ -303,7 +303,22 @@ namespace Tests
         }
 
         [TestMethod]
-        public void CompositeTransformationTest_2_NestedComposite()
+        public void CompositeTransformationTest_2_NullTransformations()
+        {
+            string text = "abc def";
+
+            ITextTransformation transformation = new CompositeTransformation(new List<ITextTransformation>()
+            {
+                null,
+                null,
+                null
+            });
+
+            Assert.AreEqual(text, transformation.Transform(text));
+        }
+
+        [TestMethod]
+        public void CompositeTransformationTest_3_NestedComposite()
         {
             string text = "abc def";
             string transformedText = "* Abc def *";

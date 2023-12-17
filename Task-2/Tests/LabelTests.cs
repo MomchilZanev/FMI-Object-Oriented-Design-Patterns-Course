@@ -1,4 +1,6 @@
+using LabelsTask.Factories;
 using LabelsTask.Labels;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Tests
 {
@@ -58,6 +60,50 @@ namespace Tests
             Assert.AreEqual("Black", ((RichLabel)richLabel).Style.Color);
             Assert.AreEqual(1, ((RichLabel)richLabel).Style.Size);
             Assert.AreEqual("Arial", ((RichLabel)richLabel).Style.Font);
+        }
+
+        [TestMethod]
+        public void CustomLabelTest_1_NoTimeout()
+        {
+            string text = "Label value";
+
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", text, "simple", "label that will never be read" })));
+            CustomLabel label = new CustomLabel();
+
+            for (int i = 0; i < 100; ++i)
+            {
+                Assert.AreEqual(text, label.GetText());
+            }
+        }
+
+        [TestMethod]
+        public void CustomLabelTest_2_NTimeout()
+        {
+            string text1 = "Label 1";
+            string text2 = "Label 2";
+            string text3 = "Label 3";
+
+            for (int N = 0; N <= 10; ++N)
+            {
+                Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", text1, "simple", text2, "simple", text3 })));
+                CustomLabel label = new CustomLabel(N);
+
+                Assert.AreEqual(text1, label.GetText());
+                for (int i = 0; i < N; ++i)
+                {
+                    Assert.AreEqual(text1, label.GetText());
+                }
+                Assert.AreEqual(text2, label.GetText());
+                for (int i = 0; i < N; ++i)
+                {
+                    Assert.AreEqual(text2, label.GetText());
+                }
+                Assert.AreEqual(text3, label.GetText());
+                for (int i = 0; i < N; ++i)
+                {
+                    Assert.AreEqual(text3, label.GetText());
+                }
+            }
         }
     }
 }
