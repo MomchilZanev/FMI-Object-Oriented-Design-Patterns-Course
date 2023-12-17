@@ -285,7 +285,56 @@ namespace Tests
         }
 
         [TestMethod]
-        public void TextTransformationEqualitiTest()
+        public void CompositeTransformationTest_1()
+        {
+            string text = "abc def";
+            string transformedText = "-={ Abc def }=-";
+
+            ITextTransformation transformation = new CompositeTransformation(new List<ITextTransformation>() 
+            {
+                new CapitalizeTransformation(),
+                null,
+                new DecorateTransformation(),
+                new ReplaceTransformation("abc", "def"),
+                null
+            });
+
+            Assert.AreEqual(transformedText, transformation.Transform(text));
+        }
+
+        [TestMethod]
+        public void CompositeTransformationTest_2_NestedComposite()
+        {
+            string text = "abc def";
+            string transformedText = "* Abc def *";
+
+            ITextTransformation transformation = new CompositeTransformation(new List<ITextTransformation>()
+            {
+                new CapitalizeTransformation(),
+                new DecorateTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>() 
+                {
+                    new ReplaceTransformation("{", " "),
+                    new ReplaceTransformation("-", " "),
+                    new ReplaceTransformation("}", " ")
+                }),
+                new NormalizeSpaceTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new TrimLeftTransformation(),
+                    new CompositeTransformation(new List<ITextTransformation>() 
+                    {
+                        new TrimRightTransformation(),
+                        new CensorTransformation("=")
+                    })
+                })
+            });
+
+            Assert.AreEqual(transformedText, transformation.Transform(text));
+        }
+
+        [TestMethod]
+        public void TextTransformationEqualityTest_1()
         {
             Assert.AreEqual(new CapitalizeTransformation(), new CapitalizeTransformation());
             Assert.AreEqual(new TrimLeftTransformation(), new TrimLeftTransformation());
@@ -303,7 +352,57 @@ namespace Tests
         }
 
         [TestMethod]
-        public void TextTransformationInEqualitiTest()
+        public void TextTransformationEqualityTest_2_Composite()
+        {
+            ITextTransformation transformation1 = new CompositeTransformation(new List<ITextTransformation>()
+            {
+                new CapitalizeTransformation(),
+                new DecorateTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new ReplaceTransformation("{", " "),
+                    new ReplaceTransformation("-", " "),
+                    new ReplaceTransformation("}", " ")
+                }),
+                new NormalizeSpaceTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new TrimLeftTransformation(),
+                    new CompositeTransformation(new List<ITextTransformation>()
+                    {
+                        new TrimRightTransformation(),
+                        new CensorTransformation("=")
+                    })
+                })
+            });
+
+            ITextTransformation transformation2 = new CompositeTransformation(new List<ITextTransformation>()
+            {
+                new CapitalizeTransformation(),
+                new DecorateTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new ReplaceTransformation("{", " "),
+                    new ReplaceTransformation("-", " "),
+                    new ReplaceTransformation("}", " ")
+                }),
+                new NormalizeSpaceTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new TrimLeftTransformation(),
+                    new CompositeTransformation(new List<ITextTransformation>()
+                    {
+                        new TrimRightTransformation(),
+                        new CensorTransformation("=")
+                    })
+                })
+            });
+
+            Assert.AreEqual(transformation1, transformation2);
+        }
+
+        [TestMethod]
+        public void TextTransformationInEqualityTest_1()
         {
             List<ITextTransformation> transformations = new List<ITextTransformation>()
             {
@@ -337,6 +436,59 @@ namespace Tests
             Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation(" a ", " b "));
             Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("A", "B"));
             Assert.AreNotEqual(new ReplaceTransformation("a", "b"), new ReplaceTransformation("A", "B"));
+        }
+
+        [TestMethod]
+        public void TextTransformationInEqualityTest_2_Composite()
+        {
+            string leafParam1 = "=";
+            string leafParam2 = "~";
+
+            ITextTransformation transformation1 = new CompositeTransformation(new List<ITextTransformation>()
+            {
+                new CapitalizeTransformation(),
+                new DecorateTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new ReplaceTransformation("{", " "),
+                    new ReplaceTransformation("-", " "),
+                    new ReplaceTransformation("}", " ")
+                }),
+                new NormalizeSpaceTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new TrimLeftTransformation(),
+                    new CompositeTransformation(new List<ITextTransformation>()
+                    {
+                        new TrimRightTransformation(),
+                        new CensorTransformation(leafParam1)
+                    })
+                })
+            });
+
+            ITextTransformation transformation2 = new CompositeTransformation(new List<ITextTransformation>()
+            {
+                new CapitalizeTransformation(),
+                new DecorateTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new ReplaceTransformation("{", " "),
+                    new ReplaceTransformation("-", " "),
+                    new ReplaceTransformation("}", " ")
+                }),
+                new NormalizeSpaceTransformation(),
+                new CompositeTransformation(new List<ITextTransformation>()
+                {
+                    new TrimLeftTransformation(),
+                    new CompositeTransformation(new List<ITextTransformation>()
+                    {
+                        new TrimRightTransformation(),
+                        new CensorTransformation(leafParam2)
+                    })
+                })
+            });
+
+            Assert.AreNotEqual(transformation1, transformation2);
         }
     }
 }
