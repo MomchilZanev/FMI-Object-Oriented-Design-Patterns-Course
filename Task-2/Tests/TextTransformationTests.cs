@@ -290,7 +290,7 @@ namespace Tests
             string text = "abc def";
             string transformedText = "-={ Abc def }=-";
 
-            ITextTransformation transformation = new CompositeTransformation(new List<ITextTransformation>() 
+            ITextTransformation transformation = new CompositeTransformation(new List<ITextTransformation>()
             {
                 new CapitalizeTransformation(),
                 null,
@@ -327,7 +327,7 @@ namespace Tests
             {
                 new CapitalizeTransformation(),
                 new DecorateTransformation(),
-                new CompositeTransformation(new List<ITextTransformation>() 
+                new CompositeTransformation(new List<ITextTransformation>()
                 {
                     new ReplaceTransformation("{", " "),
                     new ReplaceTransformation("-", " "),
@@ -337,7 +337,7 @@ namespace Tests
                 new CompositeTransformation(new List<ITextTransformation>()
                 {
                     new TrimLeftTransformation(),
-                    new CompositeTransformation(new List<ITextTransformation>() 
+                    new CompositeTransformation(new List<ITextTransformation>()
                     {
                         new TrimRightTransformation(),
                         new CensorTransformation("=")

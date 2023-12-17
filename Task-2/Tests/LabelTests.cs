@@ -1,6 +1,4 @@
-using LabelsTask.Factories;
 using LabelsTask.Labels;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Tests
 {
@@ -104,6 +102,52 @@ namespace Tests
                     Assert.AreEqual(text3, label.GetText());
                 }
             }
+        }
+
+        [TestMethod]
+        public void HelpLabelTest_1()
+        {
+            string text = "Label value";
+            string helpText = "Label help text";
+
+            HelpLabel label1 = new HelpLabel(text, helpText);
+            HelpLabel label2 = new HelpLabel(helpText, new RichLabel(text, null, 1, null));
+
+            Assert.AreEqual(text, label1.GetText());
+            Assert.AreEqual(helpText, label1.GetHelpText());
+
+            Assert.AreEqual(text, label2.GetText());
+            Assert.AreEqual(helpText, label2.GetHelpText());
+        }
+
+        [TestMethod]
+        public void HelpLabelTest_2_NullLabel()
+        {
+            string helpText = "Label help text";
+
+            HelpLabel label = new HelpLabel(helpText);
+
+            Assert.AreEqual(string.Empty, label.GetText());
+            Assert.AreEqual(helpText, label.GetHelpText());
+        }
+
+        [TestMethod]
+        public void HelpLabelTest_3_WithCustomLabel()
+        {
+            string helpText = "Custom help text";
+            string simpleText = "custom 1";
+            string richText = "custom 2";
+
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", simpleText, "rich", richText, "", "", "" })));
+            HelpLabel label = new HelpLabel(helpText, new CustomLabel(1));
+
+            Assert.AreEqual(simpleText, label.GetText());
+            Assert.AreEqual(helpText, label.GetHelpText());
+            Assert.AreEqual(simpleText, label.GetText());
+
+            Assert.AreEqual(richText, label.GetText());
+            Assert.AreEqual(helpText, label.GetHelpText());
+            Assert.AreEqual(richText, label.GetText());
         }
     }
 }
