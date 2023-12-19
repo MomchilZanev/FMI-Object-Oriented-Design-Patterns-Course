@@ -177,5 +177,41 @@ namespace Tests
             Assert.AreEqual("*** ", cyclingDecorator.GetText());
             Assert.AreEqual("ABC ", cyclingDecorator.GetText());
         }
+
+        [TestMethod]
+        public void CensorTransformationFactoryTest_1_SmallObjectsAreReused()
+        {
+            CensorTransformationFactory factory = new CensorTransformationFactory();
+
+            string censorWord1 = "abc";
+            string censorWord2 = "1234";
+            string censorWord3 = string.Empty;
+
+            ITextTransformation transformation11 = factory.CreateCensorTransformation(censorWord1);
+            ITextTransformation transformation12 = factory.CreateCensorTransformation(censorWord1);
+
+            ITextTransformation transformation21 = factory.CreateCensorTransformation(censorWord2);
+            ITextTransformation transformation22 = factory.CreateCensorTransformation(censorWord2);
+
+            ITextTransformation transformation31 = factory.CreateCensorTransformation(censorWord3);
+            ITextTransformation transformation32 = factory.CreateCensorTransformation(censorWord3);
+
+            Assert.AreSame(transformation11, transformation12);
+            Assert.AreSame(transformation21, transformation22);
+            Assert.AreSame(transformation31, transformation32);
+        }
+
+        [TestMethod]
+        public void CensorTransformationFactoryTest_1_LargeObjectsAreNotReused()
+        {
+            CensorTransformationFactory factory = new CensorTransformationFactory();
+
+            string censorWord = "abc-123";
+
+            ITextTransformation transformation1 = factory.CreateCensorTransformation(censorWord);
+            ITextTransformation transformation2 = factory.CreateCensorTransformation(censorWord);
+
+            Assert.AreNotSame(transformation1, transformation2);
+        }
     }
 }
