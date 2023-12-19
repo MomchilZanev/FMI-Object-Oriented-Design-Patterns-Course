@@ -45,18 +45,24 @@ namespace LabelsTask.Factories
             }
         }
 
+        private string ReadValue()
+        {
+            this.textWriter.WriteLine("Chose value:");
+            return this.textReader.ReadLine() ?? string.Empty;
+        }
+
         private ILabel CreateSimpleLabel()
         {
-            this.textWriter.WriteLine("Creating simple label.\nChose value:");
-            string value = this.textReader.ReadLine() ?? string.Empty;
+            this.textWriter.WriteLine("Creating simple label.");
+            string value = this.ReadValue();
 
             return new SimpleLabel(value);
         }
 
         private ILabel CreateRichLabel()
         {
-            this.textWriter.WriteLine("Creating rich label.\nChose value:");
-            string value = this.textReader.ReadLine() ?? string.Empty;
+            this.textWriter.WriteLine("Creating rich label.");
+            string value = this.ReadValue();
 
             this.textWriter.WriteLine("Chose color:");
             string color = this.textReader.ReadLine() ?? string.Empty;

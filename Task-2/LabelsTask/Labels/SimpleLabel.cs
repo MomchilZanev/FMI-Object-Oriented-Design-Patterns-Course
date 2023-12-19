@@ -2,14 +2,14 @@
 {
     public class SimpleLabel : ILabel
     {
-        private string value;
+        protected string value;
 
         public SimpleLabel(string value)
         {
             this.value = value ?? string.Empty;
         }
 
-        public string GetText()
+        public virtual string GetText()
         {
             return this.value;
         }

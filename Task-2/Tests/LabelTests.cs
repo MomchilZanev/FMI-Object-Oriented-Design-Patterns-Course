@@ -65,7 +65,7 @@ namespace Tests
         {
             string text = "Label value";
 
-            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", text, "simple", "label that will never be read" })));
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { text, "value that will never be read" })));
             CustomLabel label = new CustomLabel();
 
             for (int i = 0; i < 100; ++i)
@@ -83,7 +83,7 @@ namespace Tests
 
             for (int N = 0; N <= 10; ++N)
             {
-                Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", text1, "simple", text2, "simple", text3 })));
+                Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { text1, text2, text3 })));
                 CustomLabel label = new CustomLabel(N);
 
                 Assert.AreEqual(text1, label.GetText());
@@ -109,7 +109,7 @@ namespace Tests
         {
             string text = "Label value";
 
-            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", text, "simple", "label that will never be read" })));
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { text, "value that will never be read" })));
             CustomLabel label = new CustomLabel(-5);
 
             for (int i = 0; i < 100; ++i)
@@ -149,19 +149,19 @@ namespace Tests
         public void HelpLabelTest_3_WithCustomLabel()
         {
             string helpText = "Custom help text";
-            string simpleText = "custom 1";
-            string richText = "custom 2";
+            string text1 = "custom 1";
+            string text2 = "custom 2";
 
-            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { "simple", simpleText, "rich", richText, "", "", "" })));
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { text1, text2 })));
             HelpLabel label = new HelpLabel(helpText, new CustomLabel(1));
 
-            Assert.AreEqual(simpleText, label.GetText());
+            Assert.AreEqual(text1, label.GetText());
             Assert.AreEqual(helpText, label.GetHelpText());
-            Assert.AreEqual(simpleText, label.GetText());
+            Assert.AreEqual(text1, label.GetText());
 
-            Assert.AreEqual(richText, label.GetText());
+            Assert.AreEqual(text2, label.GetText());
             Assert.AreEqual(helpText, label.GetHelpText());
-            Assert.AreEqual(richText, label.GetText());
+            Assert.AreEqual(text2, label.GetText());
         }
     }
 }

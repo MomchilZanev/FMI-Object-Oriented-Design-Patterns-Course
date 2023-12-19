@@ -4,19 +4,20 @@ namespace LabelsTask.Factories
 {
     public class CensorTransformationFactory
     {
-        private List<CensorTransformation> transformationsCache;
+        private List<string> censorWords;
 
         public CensorTransformationFactory()
         {
-            transformationsCache = new List<CensorTransformation>();
+            this.censorWords = new List<string>();
         }
 
         public CensorTransformation CreateCensorTransformation(string w)
         {
-            CensorTransformation result = this.transformationsCache.FirstOrDefault(t => t.W == w) ?? new CensorTransformation(w);
+            string word = this.censorWords.FirstOrDefault(t => t == w) ?? w;
+            CensorTransformation result = new CensorTransformation(word);
 
-            if (w.Length <= 4 && !this.transformationsCache.Any(t => t.W == w))
-                this.transformationsCache.Add(result);
+            if (w.Length <= 4 && !this.censorWords.Any(t => t == w))
+                this.censorWords.Add(word);
 
             return result;
         }

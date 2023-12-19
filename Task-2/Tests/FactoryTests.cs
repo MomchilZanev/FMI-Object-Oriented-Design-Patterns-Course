@@ -2,6 +2,7 @@
 using LabelsTask.Factories;
 using LabelsTask.Labels;
 using LabelsTask.Transformations;
+using System.Text;
 
 namespace Tests
 {
@@ -56,15 +57,15 @@ namespace Tests
         public void StreamLabelFactoryTest_3_CreateCustomLabel()
         {
             int customLabelTimeout = 2;
-            string proxyLabelValue1 = "creating a custom label";
-            string proxyLabelValue2 = "custom label working?";
+            string proxyLabelValue1 = "value 1";
+            string proxyLabelValue2 = "value 2";
 
             Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string>
             {
                 null,
                 "custom", customLabelTimeout.ToString(),
-                "simple", proxyLabelValue1,
-                "rich", proxyLabelValue2, "", "", ""
+                proxyLabelValue1,
+                proxyLabelValue2
             })));
 
             StreamLabelFactory factory = new StreamLabelFactory(Console.In, Console.Out);
@@ -183,24 +184,42 @@ namespace Tests
         {
             CensorTransformationFactory factory = new CensorTransformationFactory();
 
-            string censorWord1 = "abc";
-            string censorWord2 = "1234";
-            string censorWord3 = string.Empty;
+            string censorWord1 = "zyx";
+            string censorWord2 = "9876";
+            string censorWord3 = " ";
 
-            ITextTransformation transformation11 = factory.CreateCensorTransformation(censorWord1);
-            ITextTransformation transformation12 = factory.CreateCensorTransformation(censorWord1);
+            // Reading censor word from stream to prevent strings from being stored in the intern pool
+            // (see: https://learn.microsoft.com/en-us/dotnet/api/system.string.intern#remarks)
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> 
+            { 
+                censorWord1, censorWord1,
+                censorWord2, censorWord2,
+                censorWord3, censorWord3
+            })));
 
-            ITextTransformation transformation21 = factory.CreateCensorTransformation(censorWord2);
-            ITextTransformation transformation22 = factory.CreateCensorTransformation(censorWord2);
+            CensorTransformation transformation11 = factory.CreateCensorTransformation(Console.In.ReadLine());
+            CensorTransformation transformation12 = factory.CreateCensorTransformation(Console.In.ReadLine());
 
-            ITextTransformation transformation31 = factory.CreateCensorTransformation(censorWord3);
-            ITextTransformation transformation32 = factory.CreateCensorTransformation(censorWord3);
+            CensorTransformation transformation21 = factory.CreateCensorTransformation(Console.In.ReadLine());
+            CensorTransformation transformation22 = factory.CreateCensorTransformation(Console.In.ReadLine());
 
-            Assert.AreSame(transformation11, transformation12);
-            Assert.AreSame(transformation21, transformation22);
-            Assert.AreSame(transformation31, transformation32);
+            CensorTransformation transformation31 = factory.CreateCensorTransformation(Console.In.ReadLine());
+            CensorTransformation transformation32 = factory.CreateCensorTransformation(Console.In.ReadLine());
+
+            Assert.AreSame(transformation11.W, transformation12.W);
+            Assert.AreEqual(censorWord1, transformation11.W);
+            Assert.AreEqual(censorWord1, transformation12.W);
+
+            Assert.AreSame(transformation21.W, transformation22.W);
+            Assert.AreEqual(censorWord2, transformation21.W);
+            Assert.AreEqual(censorWord2, transformation22.W);
+
+            Assert.AreSame(transformation31.W, transformation32.W);
+            Assert.AreEqual(censorWord3, transformation31.W);
+            Assert.AreEqual(censorWord3, transformation32.W);
         }
 
+        // TODO: Fix
         [TestMethod]
         public void CensorTransformationFactoryTest_1_LargeObjectsAreNotReused()
         {
@@ -208,10 +227,15 @@ namespace Tests
 
             string censorWord = "abc-123";
 
-            ITextTransformation transformation1 = factory.CreateCensorTransformation(censorWord);
-            ITextTransformation transformation2 = factory.CreateCensorTransformation(censorWord);
+            // Reading censor word from stream to prevent strings from being stored in the intern pool
+            // (see: https://learn.microsoft.com/en-us/dotnet/api/system.string.intern#remarks)
+            Console.SetIn(new StringReader(string.Join(Environment.NewLine, new List<string> { censorWord, censorWord })));
+            CensorTransformation transformation1 = factory.CreateCensorTransformation(Console.In.ReadLine());
+            CensorTransformation transformation2 = factory.CreateCensorTransformation(Console.In.ReadLine());
 
-            Assert.AreNotSame(transformation1, transformation2);
+            Assert.AreNotSame(transformation1.W, transformation2.W);
+            Assert.AreEqual(censorWord, transformation1.W);
+            Assert.AreEqual(censorWord, transformation2.W);
         }
     }
 }

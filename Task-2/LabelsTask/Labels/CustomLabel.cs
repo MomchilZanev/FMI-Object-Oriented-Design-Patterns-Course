@@ -2,34 +2,35 @@
 
 namespace LabelsTask.Labels
 {
-    public class CustomLabel : ILabel
+    public class CustomLabel : SimpleLabel
     {
-        private StreamLabelFactory labelFactory;
-        private ILabel? cachedLabel;
+        private bool initialState;
         private int timeout;
         private int callsRemaining;
 
         // timeout = -1 -> never re-read label text
-        public CustomLabel(int timeout = -1)
+        public CustomLabel(int timeout = -1) : base(string.Empty)
         {
-            this.labelFactory = new StreamLabelFactory(Console.In, Console.Out);
+            this.initialState = true;
             this.timeout = timeout < -1 ? -1 : timeout;
-            this.callsRemaining = timeout;
+            this.callsRemaining = this.timeout;
         }
 
-        public string GetText()
+        public override string GetText()
         {
-            if (this.cachedLabel is null || (this.callsRemaining <= 0 && this.timeout != -1))
+            if (this.initialState || (this.callsRemaining <= 0 && this.timeout != -1))
             {
-                this.cachedLabel = this.labelFactory.CreateLabel();
+                Console.Out.WriteLine("Read custom label value:");
+                this.value = Console.In.ReadLine() ?? string.Empty;
                 this.callsRemaining = this.timeout;
+                this.initialState = false;
             }
             else
             {
                 --this.callsRemaining;
             }
 
-            return this.cachedLabel.GetText();
+            return base.GetText();
         }
     }
 }
