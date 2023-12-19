@@ -4,6 +4,7 @@ namespace LabelsTask.Factories
 {
     public class StreamTextTransformationFactory
     {
+        private CensorTransformationFactory? censorTransformationFactory;
         private TextReader textReader;
         private TextWriter textWriter;
         private List<string> availableTypes;
@@ -15,6 +16,11 @@ namespace LabelsTask.Factories
             this.textWriter = textWriter;
             this.availableTypes = new List<string>() { "capitalize", "trim-left", "trim-right", "normalize-space", "decorate", "censor", "replace", "composite" };
             this.informationPrompt = string.Format("Create a text transformation.\nAvailable types: [ {0} ]\nChoose transformation type.", string.Join(", ", this.availableTypes));
+        }
+
+        public void SetCensorTransformationFactory(CensorTransformationFactory censorTransformationFactory)
+        {
+            this.censorTransformationFactory = censorTransformationFactory;
         }
 
         public ITextTransformation CreateTextTransformation()
@@ -38,7 +44,10 @@ namespace LabelsTask.Factories
                         return new DecorateTransformation();
                     case "censor":
                         this.textWriter.WriteLine("w:");
-                        return new CensorTransformation(this.textReader.ReadLine() ?? string.Empty);
+                        string w = this.textReader.ReadLine() ?? string.Empty;
+                        return this.censorTransformationFactory is null ? 
+                            new CensorTransformation(w) : 
+                            this.censorTransformationFactory.CreateCensorTransformation(w);
                     case "replace":
                         this.textWriter.WriteLine("a:");
                         string a = this.textReader.ReadLine() ?? string.Empty;

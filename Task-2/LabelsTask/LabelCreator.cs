@@ -6,13 +6,16 @@ namespace LabelsTask
 {
     public class LabelCreator
     {
+        private CensorTransformationFactory censorTransformationFactory;
         private StreamTextTransformationFactory textTransformationFactory;
         private StreamLabelFactory labelFactory;
         private StreamDecoratorFactory decoratorFactory;
 
         public LabelCreator()
         {
+            this.censorTransformationFactory = new CensorTransformationFactory();
             this.textTransformationFactory = new StreamTextTransformationFactory(Console.In, Console.Out);
+            this.textTransformationFactory.SetCensorTransformationFactory(this.censorTransformationFactory);
             this.labelFactory = new StreamLabelFactory(Console.In, Console.Out);
             this.decoratorFactory = new StreamDecoratorFactory(Console.In, Console.Out, this.textTransformationFactory);
         }
