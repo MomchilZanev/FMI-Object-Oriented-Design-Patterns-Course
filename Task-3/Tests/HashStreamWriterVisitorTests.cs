@@ -1,8 +1,8 @@
+using Checksums.ChecksumCalculators;
+using Checksums.FileStructure;
 using Checksums.FileStructure.Builders;
 using Checksums.FileStructure.Visitors;
-using Checksums.FileStructure;
 using System.Diagnostics;
-using Checksums.ChecksumCalculators;
 using System.Text;
 
 namespace Tests
@@ -33,8 +33,7 @@ namespace Tests
             Dictionary<string, string> expectedHashedFiles = this.getDirectoryFileHash(startingDirectory, hashAlgorithm)
                                                             .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
                                                             .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                                            //.Where(tokens => Path.GetExtension(tokens[1]).ToLower() != ".lnk")
-                                                            .ToDictionary(tokens => tokens[0], tokens => tokens[1]);
+                                                            .ToDictionary(tokens => tokens[0], tokens => Path.GetRelativePath(startingDirectory, tokens[1]));
 
             DirectoryStructureBuilderBase respectLinksDirectoryStructureBuilder = new IgnoreLinksDirectoryStructureBuilder();
             respectLinksDirectoryStructureBuilder.SetupDirectory(startingDirectory);
@@ -43,7 +42,7 @@ namespace Tests
             FileNodeBase directory = respectLinksDirectoryStructureBuilder.GetProduct();
 
             MemoryStream memoryStream = new MemoryStream();
-            FileNodeVisitorBase reportWriterVisitor = new HashStreamWriterVisitor(new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
+            FileNodeVisitorBase reportWriterVisitor = new HashStreamWriterVisitor(startingDirectory, new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
 
             directory.Accept(reportWriterVisitor);
 
@@ -63,20 +62,21 @@ namespace Tests
         [DataRow("MD5")]
         public void RespectLinksTest(string hashAlgorithm)
         {
+            string startingDirectory = Path.Combine(testDirectory, "Starting Directory");
             Dictionary<string, string> expectedHashedFiles = this.getDirectoryFileHash(testDirectory, hashAlgorithm)
                                                             .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
                                                             .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries))
                                                             .Where(tokens => Path.GetExtension(tokens[1]).ToLower() != ".lnk")
-                                                            .ToDictionary(tokens => tokens[0], tokens => tokens[1]);
+                                                            .ToDictionary(tokens => tokens[0], tokens => Path.GetRelativePath(startingDirectory, tokens[1]));
 
             DirectoryStructureBuilderBase respectLinksDirectoryStructureBuilder = new RespectLinksDirectoryStructureBuilder();
-            respectLinksDirectoryStructureBuilder.SetupDirectory(Path.Combine(testDirectory, "Starting Directory"));
+            respectLinksDirectoryStructureBuilder.SetupDirectory(startingDirectory);
             respectLinksDirectoryStructureBuilder.AddFiles();
             respectLinksDirectoryStructureBuilder.AddSubDirectories();
             FileNodeBase directory = respectLinksDirectoryStructureBuilder.GetProduct();
 
             MemoryStream memoryStream = new MemoryStream();
-            FileNodeVisitorBase reportWriterVisitor = new HashStreamWriterVisitor(new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
+            FileNodeVisitorBase reportWriterVisitor = new HashStreamWriterVisitor(startingDirectory, new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
 
             directory.Accept(reportWriterVisitor);
 

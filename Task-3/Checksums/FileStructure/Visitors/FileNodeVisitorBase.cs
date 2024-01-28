@@ -2,6 +2,13 @@
 {
     public abstract class FileNodeVisitorBase
     {
+        protected string originPath;
+
+        public FileNodeVisitorBase(string originPath)
+        {
+            this.originPath = originPath;
+        }
+
         public virtual void Visit(FileNode fileNode)
         {
             this.ProcessFile(fileNode);

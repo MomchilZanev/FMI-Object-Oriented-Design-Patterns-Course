@@ -7,7 +7,7 @@ namespace Checksums.FileStructure.Visitors
         private IChecksumCalculator checksumCalculator;
         private StreamWriter streamWriter;
 
-        public HashStreamWriterVisitor(StreamWriter streamWriter, IChecksumCalculator checksumCalculator)
+        public HashStreamWriterVisitor(string originPath, StreamWriter streamWriter, IChecksumCalculator checksumCalculator) : base(originPath)
         {
             this.checksumCalculator = checksumCalculator;
             this.streamWriter = streamWriter;
@@ -18,7 +18,7 @@ namespace Checksums.FileStructure.Visitors
         {
             using (FileStream fs = File.OpenRead(fileNode.Path))
             {
-                this.streamWriter.WriteLine(string.Format("{0} {1}", checksumCalculator.Calculate(fs), fileNode.Path));
+                this.streamWriter.WriteLine(string.Format("{0} {1}", checksumCalculator.Calculate(fs), Path.GetRelativePath(this.originPath, fileNode.Path)));
             }
         }
     }
