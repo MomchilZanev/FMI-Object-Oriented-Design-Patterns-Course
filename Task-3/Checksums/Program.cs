@@ -2,6 +2,7 @@
 using Checksums.FileStructure;
 using Checksums.FileStructure.Builders;
 using Checksums.FileStructure.Visitors;
+using Checksums.Progress;
 
 namespace Checksums
 {
@@ -39,7 +40,9 @@ namespace Checksums
             File.Create(outputFile).Close();
             using (FileStream outputFileStream = File.Open(outputFile, FileMode.Open))
             {
+                ProgressReporter progressReporter = new ProgressReporter(directory.Size);
                 FileNodeVisitorBase hashStreamWriterVisitor = new HashStreamWriterVisitor(directoryToScan, new StreamWriter(outputFileStream), new CommonChecksumCalculator(hashAlgorithm));
+                hashStreamWriterVisitor.Subscribe(progressReporter);
                 directory.Accept(hashStreamWriterVisitor);
             }
         }

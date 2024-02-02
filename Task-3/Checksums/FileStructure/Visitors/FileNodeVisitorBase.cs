@@ -1,6 +1,8 @@
-﻿namespace Checksums.FileStructure.Visitors
+﻿using Checksums.Progress;
+
+namespace Checksums.FileStructure.Visitors
 {
-    public abstract class FileNodeVisitorBase
+    public abstract class FileNodeVisitorBase : ObservableBase
     {
         protected string originPath;
 

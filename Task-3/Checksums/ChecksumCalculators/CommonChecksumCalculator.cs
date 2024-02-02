@@ -1,11 +1,13 @@
-﻿using System.Security.Cryptography;
+﻿using Checksums.Progress;
+using System.Security.Cryptography;
 
 namespace Checksums.ChecksumCalculators
 {
-    public class CommonChecksumCalculator : IChecksumCalculator
+    public class CommonChecksumCalculator : ObservableBase, IChecksumCalculator
     {
         public const string unsupportedHashAlgorithmExceptionMessage = "Unsupported hash algorithm.";
 
+        private const int KB = 1024;
         private List<string> supportedHashAlgorithms;
         private int hashAlgorithmIndex;
 
@@ -27,8 +29,26 @@ namespace Checksums.ChecksumCalculators
             using (HashAlgorithm algorithm = this.GetHashAlgorithm())
             {
                 inputStream.Position = 0;
-                byte[] hash = algorithm.ComputeHash(inputStream);
-                result = BitConverter.ToString(hash).Replace("-", "");
+
+                int bytesRead = 0;
+                byte[] buffer = new byte[KB];
+                while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    algorithm.TransformBlock(buffer, 0, bytesRead, buffer, 0);
+
+                    // Notify for every 5 KBs read and on the last block
+                    if (inputStream.Position % (5 * KB) == 0 || bytesRead < KB)
+                    {
+                        this.Notify(inputStream.Position);
+                    }
+                }
+                algorithm.TransformFinalBlock(buffer, 0, 0);
+                byte[] hash = algorithm.Hash ?? new byte[0];
+
+                if (hash.Length > 0)
+                {
+                    result = BitConverter.ToString(hash).Replace("-", "");
+                }
             }
             inputStream.Position = originalPosition;
 
