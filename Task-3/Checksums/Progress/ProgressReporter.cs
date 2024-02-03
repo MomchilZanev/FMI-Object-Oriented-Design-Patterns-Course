@@ -9,7 +9,6 @@ namespace Checksums.Progress
         private ulong totalBytesExpected;
         private ulong totalBytesRead;
 
-        private long currentFileBytesReadLastRead;
         private long currentFileBytesRead;
         private string currentFile;
 
@@ -20,7 +19,6 @@ namespace Checksums.Progress
             this.totalBytesExpected = totalBytesExpected;
             this.totalBytesRead = 0;
 
-            this.currentFileBytesReadLastRead = 0;
             this.currentFileBytesRead = 0;
             this.currentFile = "(nothing)";
         }
@@ -30,15 +28,13 @@ namespace Checksums.Progress
             if (message is string)
             {
                 this.currentFile = (string)message;
-                this.currentFileBytesReadLastRead = 0;
                 this.currentFileBytesRead = 0;
-                Console.Write(Environment.NewLine);
+                Console.WriteLine();
             }
             else if (message is long)
             {
+                this.totalBytesRead += (ulong)(long)message - (ulong)this.currentFileBytesRead;
                 this.currentFileBytesRead = (long)message;
-                this.totalBytesRead += (ulong)this.currentFileBytesRead - (ulong)this.currentFileBytesReadLastRead;
-                this.currentFileBytesReadLastRead = this.currentFileBytesRead;
             }
             else
             {
@@ -71,7 +67,7 @@ namespace Checksums.Progress
             }
 
             Console.SetCursorPosition(0, Console.CursorTop - 1); // Overwrite progress line
-            Console.Write(string.Format("\rProcessing {0}... {1} byte(s) read.{2}Progress: {3:P2} done, ETA: {4:hh\\:mm\\:ss}",
+            Console.Write(string.Format("\rProcessing: {0}... {1} byte(s) read{2}Progress: {3:P2} done, ETA: {4:hh\\:mm\\:ss}",
                 this.currentFile,
                 this.currentFileBytesRead,
                 Environment.NewLine,
