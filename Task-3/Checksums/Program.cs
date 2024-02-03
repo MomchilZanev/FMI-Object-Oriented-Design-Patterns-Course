@@ -8,6 +8,8 @@ namespace Checksums
 {
     internal class Program
     {
+        private static EventWaitHandle waitHandle = new ManualResetEvent(initialState: true);
+
         static void Main(string[] args)
         {
             Console.WriteLine("Choose directory to scan:");
@@ -16,16 +18,18 @@ namespace Checksums
             Console.WriteLine("Choose output file:");
             string outputFile = Console.ReadLine() ?? string.Empty;
 
-            Console.WriteLine("Ignore links? (y/n)");
+            Console.WriteLine("Ignore links? (Y/N)");
             bool ignoreLinks = (Console.ReadLine() ?? string.Empty).Trim().ToLower() == "y";
 
             Console.WriteLine("Choose hash algorithm: [ SHA1, SHA256, SHA384, SHA512, MD5 ]");
             string hashAlgorithm = Console.ReadLine() ?? string.Empty;
 
-            Console.WriteLine("Display report? (y/n)");
+            Console.WriteLine("Display report? (Y/N)");
             bool displayReport = (Console.ReadLine() ?? string.Empty).Trim().ToLower() == "y";
 
-            DirectoryStructureBuilderBase directoryStructureBuilder = ignoreLinks ? new IgnoreLinksDirectoryStructureBuilder() : new RespectLinksDirectoryStructureBuilder();
+            DirectoryStructureBuilderBase directoryStructureBuilder = ignoreLinks ?
+                new IgnoreLinksDirectoryStructureBuilder() :
+                new RespectLinksDirectoryStructureBuilder();
             directoryStructureBuilder.SetupDirectory(directoryToScan);
             directoryStructureBuilder.AddFiles();
             directoryStructureBuilder.AddSubDirectories();
@@ -41,9 +45,25 @@ namespace Checksums
             using (FileStream outputFileStream = File.Open(outputFile, FileMode.Open))
             {
                 ProgressReporter progressReporter = new ProgressReporter(directory.Size);
-                FileNodeVisitorBase hashStreamWriterVisitor = new HashStreamWriterVisitor(directoryToScan, new StreamWriter(outputFileStream), new CommonChecksumCalculator(hashAlgorithm));
+                FileNodeVisitorBase hashStreamWriterVisitor = new HashStreamWriterVisitor(directoryToScan, new StreamWriter(outputFileStream), new CommonChecksumCalculator(hashAlgorithm, waitHandle), waitHandle);
                 hashStreamWriterVisitor.Subscribe(progressReporter);
-                directory.Accept(hashStreamWriterVisitor);
+
+                Thread scanThread = new Thread(() => directory.Accept(hashStreamWriterVisitor));
+                scanThread.Start();
+                bool running = true;
+                while (scanThread.IsAlive)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey();
+                    if (key.Key == ConsoleKey.Spacebar)
+                    {
+                        if (running)
+                            waitHandle.Reset();
+                        else
+                            waitHandle.Set();
+
+                        running = !running;
+                    }
+                }
             }
         }
     }

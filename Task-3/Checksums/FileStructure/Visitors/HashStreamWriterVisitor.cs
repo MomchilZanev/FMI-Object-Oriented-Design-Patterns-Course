@@ -7,13 +7,31 @@ namespace Checksums.FileStructure.Visitors
     {
         private IChecksumCalculator checksumCalculator;
         private StreamWriter streamWriter;
+        private EventWaitHandle? waitHandle;
 
-        public HashStreamWriterVisitor(string originPath, StreamWriter streamWriter, IChecksumCalculator checksumCalculator) : base(originPath)
+        public HashStreamWriterVisitor(string originPath, StreamWriter streamWriter, IChecksumCalculator checksumCalculator, EventWaitHandle? waitHandle = null)
+            : base(originPath)
         {
             this.checksumCalculator = checksumCalculator;
-            
             this.streamWriter = streamWriter;
             this.streamWriter.AutoFlush = true;
+            this.waitHandle = waitHandle;
+        }
+
+        public override void Visit(DirectoryNode directoryNode)
+        {
+            if (this.waitHandle is not null)
+                this.waitHandle.WaitOne();
+
+            base.Visit(directoryNode);
+        }
+
+        public override void Visit(FileNode fileNode)
+        {
+            if (this.waitHandle is not null)
+                this.waitHandle.WaitOne();
+
+            base.Visit(fileNode);
         }
 
         public override void ProcessFile(FileNode fileNode)

@@ -6,51 +6,45 @@ namespace Checksums.ChecksumCalculators
     public class CommonChecksumCalculator : ObservableBase, IChecksumCalculator
     {
         public const string unsupportedHashAlgorithmExceptionMessage = "Unsupported hash algorithm.";
-
         private const int KB = 1024;
+
         private List<string> supportedHashAlgorithms;
         private int hashAlgorithmIndex;
+        private EventWaitHandle? waitHandle;
 
-        public CommonChecksumCalculator(string hashAlgorithm)
+        public CommonChecksumCalculator(string hashAlgorithm, EventWaitHandle? waitHandle = null)
         {
             this.supportedHashAlgorithms = new List<string> { "SHA1", "SHA256", "SHA384", "SHA512", "MD5" };
-
             if (!this.supportedHashAlgorithms.Contains(hashAlgorithm))
                 throw new ArgumentException(unsupportedHashAlgorithmExceptionMessage);
-
             this.hashAlgorithmIndex = this.supportedHashAlgorithms.IndexOf(hashAlgorithm);
+            this.waitHandle = waitHandle;
         }
 
         public string Calculate(Stream inputStream)
         {
             string result = string.Empty;
-
-            long originalPosition = inputStream.Position;
             using (HashAlgorithm algorithm = this.GetHashAlgorithm())
             {
-                inputStream.Position = 0;
-
                 int bytesRead = 0;
                 byte[] buffer = new byte[KB];
                 while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
+                    if (this.waitHandle is not null)
+                        this.waitHandle.WaitOne();
+
                     algorithm.TransformBlock(buffer, 0, bytesRead, buffer, 0);
 
-                    // Notify for every 5 KBs read and on the last block
-                    if (inputStream.Position % (5 * KB) == 0 || bytesRead < KB)
-                    {
+                    // Notify on last block and for every 5 KBs read
+                    if (bytesRead < KB || inputStream.Position % (5 * KB) == 0)
                         this.Notify(inputStream.Position);
-                    }
                 }
                 algorithm.TransformFinalBlock(buffer, 0, 0);
                 byte[] hash = algorithm.Hash ?? new byte[0];
 
                 if (hash.Length > 0)
-                {
                     result = BitConverter.ToString(hash).Replace("-", "");
-                }
             }
-            inputStream.Position = originalPosition;
 
             return result;
         }

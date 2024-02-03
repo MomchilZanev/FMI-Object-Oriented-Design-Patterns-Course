@@ -22,7 +22,7 @@ namespace Checksums.FileStructure.Visitors
             {
                 if (child is FileNode)
                 {
-                    this.ProcessFile((FileNode)child);
+                    this.Visit((FileNode)child);
                 }
                 else
                 {

@@ -4,23 +4,21 @@ namespace Checksums.Progress
 {
     public class ProgressReporter : Observer
     {
-        private Stopwatch stopwatch;
-
         private ulong totalBytesExpected;
         private ulong totalBytesRead;
-
-        private long currentFileBytesRead;
         private string currentFile;
+        private long currentFileBytesRead;
+        private Stopwatch stopwatch;
+        private ulong bytesReadSinceТicking;
 
         public ProgressReporter(ulong totalBytesExpected)
         {
-            this.stopwatch = new Stopwatch();
-
             this.totalBytesExpected = totalBytesExpected;
             this.totalBytesRead = 0;
-
+            this.currentFile = string.Empty;
             this.currentFileBytesRead = 0;
-            this.currentFile = "(nothing)";
+            this.stopwatch = new Stopwatch();
+            this.bytesReadSinceТicking = 0;
         }
 
         public void Update(object message)
@@ -33,27 +31,30 @@ namespace Checksums.Progress
             }
             else if (message is long)
             {
-                this.totalBytesRead += (ulong)(long)message - (ulong)this.currentFileBytesRead;
+                ulong newBytesRead = (ulong)(long)message - (ulong)this.currentFileBytesRead;
+                this.totalBytesRead += newBytesRead;
+                this.bytesReadSinceТicking += newBytesRead;
                 this.currentFileBytesRead = (long)message;
             }
             else
-            {
                 throw new ArgumentException("Unexpected message");
-            }
+
             RefreshDisplay();
         }
 
         private void RefreshDisplay()
         {
-            if (!this.stopwatch.IsRunning)
+            // Refresh ETA time sample every 10 seconds
+            if (!this.stopwatch.IsRunning || this.stopwatch.Elapsed.TotalSeconds > 10)
             {
-                this.stopwatch.Start();
+                this.stopwatch.Restart();
+                this.bytesReadSinceТicking = 0;
             }
 
             double completion = (double)totalBytesRead / (double)totalBytesExpected;
 
             ulong bytesRemaining = this.totalBytesExpected - this.totalBytesRead;
-            double bytesPerMillisecond = this.totalBytesRead / this.stopwatch.Elapsed.TotalMilliseconds;
+            double bytesPerMillisecond = this.bytesReadSinceТicking / this.stopwatch.Elapsed.TotalMilliseconds;
             double remainingMilliseconds = bytesRemaining / bytesPerMillisecond;
 
             TimeSpan? remainingTime = null;
@@ -61,7 +62,7 @@ namespace Checksums.Progress
             {
                 remainingTime = TimeSpan.FromMilliseconds(remainingMilliseconds);
             }
-            catch (OverflowException)
+            catch (Exception)
             {
                 remainingTime = TimeSpan.FromHours(23).Add(TimeSpan.FromMinutes(59).Add(TimeSpan.FromSeconds(59)));
             }
