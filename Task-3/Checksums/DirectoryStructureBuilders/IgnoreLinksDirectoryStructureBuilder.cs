@@ -1,4 +1,6 @@
-﻿namespace Checksums.FileStructure.Builders
+﻿using Checksums.FileStructure;
+
+namespace Checksums.DirectoryStructureBuilders
 {
     public class IgnoreLinksDirectoryStructureBuilder : DirectoryStructureBuilderBase
     {
@@ -7,9 +9,9 @@
             if (this.directory is null)
                 return;
 
-            foreach (string filePath in Directory.GetFiles(this.directory.Path))
+            foreach (string filePath in System.IO.Directory.GetFiles(this.directory.Path))
             {
-                FileNode fileNode = new FileNode(filePath, (ulong)new FileInfo(filePath).Length);
+                IFileNode fileNode = new FileNode(filePath, (ulong)new FileInfo(filePath).Length);
                 this.directory.AddChild(fileNode);
             }
         }
@@ -19,8 +21,8 @@
             if (this.directory is null)
                 return;
 
-            DirectoryStructureBuilderBase builder = new IgnoreLinksDirectoryStructureBuilder();
-            foreach (string subdirectoryPath in Directory.GetDirectories(this.directory.Path))
+            IDirectoryStructureBuilder builder = new IgnoreLinksDirectoryStructureBuilder();
+            foreach (string subdirectoryPath in System.IO.Directory.GetDirectories(this.directory.Path))
             {
                 builder.Reset(subdirectoryPath);
                 builder.AddFiles();

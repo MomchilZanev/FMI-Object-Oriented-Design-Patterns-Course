@@ -1,17 +1,20 @@
-﻿namespace Checksums.FileStructure.Builders
+﻿using Checksums.FileStructure;
+
+namespace Checksums.DirectoryStructureBuilders
 {
     public class RespectLinksDirectoryStructureBuilder : DirectoryStructureBuilderBase
     {
         private HashSet<string> visited;
 
-        public RespectLinksDirectoryStructureBuilder()
+        public RespectLinksDirectoryStructureBuilder(HashSet<string>? visited = null)
         {
-            this.visited = new HashSet<string>();
+            this.visited = visited ?? new HashSet<string>();
         }
 
-        public RespectLinksDirectoryStructureBuilder(HashSet<string> visited)
+        public override void SetupDirectory(string path)
         {
-            this.visited = visited;
+            base.SetupDirectory(path);
+            this.visited.Add(path);
         }
 
         public override void AddFiles()
@@ -19,15 +22,15 @@
             if (this.directory is null)
                 return;
 
-            foreach (string filePath in Directory.GetFiles(this.directory.Path))
+            foreach (string filePath in System.IO.Directory.GetFiles(this.directory.Path))
             {
-                string targetFilePath = this.getRealTargetPath(filePath);
+                string targetFilePath = getRealTargetPath(filePath);
                 if (this.visited.Contains(targetFilePath))
                     continue;
 
-                if (File.GetAttributes(targetFilePath).HasFlag(FileAttributes.Directory))
+                if (System.IO.File.GetAttributes(targetFilePath).HasFlag(FileAttributes.Directory))
                 {
-                    DirectoryStructureBuilderBase builder = new RespectLinksDirectoryStructureBuilder(this.visited);
+                    IDirectoryStructureBuilder builder = new RespectLinksDirectoryStructureBuilder(this.visited);
                     builder.Reset(targetFilePath);
                     builder.AddFiles();
                     builder.AddSubDirectories();
@@ -37,7 +40,7 @@
                 }
                 else
                 {
-                    FileNode fileNode = new FileNode(targetFilePath, (ulong)new FileInfo(targetFilePath).Length);
+                    IFileNode fileNode = new FileNode(targetFilePath, (ulong)new FileInfo(targetFilePath).Length);
                     this.directory.AddChild(fileNode);
                     this.visited.Add(targetFilePath);
                 }
@@ -49,8 +52,8 @@
             if (this.directory is null)
                 return;
 
-            DirectoryStructureBuilderBase builder = new RespectLinksDirectoryStructureBuilder(this.visited);
-            foreach (string subdirectoryPath in Directory.GetDirectories(this.directory.Path))
+            IDirectoryStructureBuilder builder = new RespectLinksDirectoryStructureBuilder(this.visited);
+            foreach (string subdirectoryPath in System.IO.Directory.GetDirectories(this.directory.Path))
             {
                 if (this.visited.Contains(subdirectoryPath))
                     continue;
@@ -64,23 +67,19 @@
             }
         }
 
-        public override void SetupDirectory(string path)
-        {
-            base.SetupDirectory(path);
-            this.visited.Add(path);
-        }
-
         private string getRealTargetPath(string path)
         {
-            if (Path.GetExtension(path).ToLower() == ".lnk")
+            string realTargetPath = path;
+
+            if (System.IO.Path.GetExtension(path).ToLower() == ".lnk")
             {
                 IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
                 IWshRuntimeLibrary.IWshShortcut shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(path);
 
-                return shortcut.TargetPath;
+                realTargetPath = shortcut.TargetPath;
             }
 
-            return path;
+            return realTargetPath;
         }
     }
 }

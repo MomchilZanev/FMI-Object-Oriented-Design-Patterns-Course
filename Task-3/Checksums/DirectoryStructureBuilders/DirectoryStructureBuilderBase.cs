@@ -1,28 +1,30 @@
-﻿namespace Checksums.FileStructure.Builders
+﻿using Checksums.FileStructure;
+
+namespace Checksums.DirectoryStructureBuilders
 {
-    public abstract class DirectoryStructureBuilderBase
+    public abstract class DirectoryStructureBuilderBase : IDirectoryStructureBuilder
     {
-        protected DirectoryNode? directory;
+        protected IDirectoryNode? directory;
 
         public virtual void SetupDirectory(string path)
         {
-            if (!Directory.Exists(path))
+            if (!System.IO.Directory.Exists(path))
                 throw new DirectoryNotFoundException(string.Format("Directory \"{0}\" does not exist.", path));
 
             this.directory = new DirectoryNode(path);
         }
 
-        public abstract void AddFiles();
-
-        public abstract void AddSubDirectories();
-
         public void Reset(string path)
         {
             this.directory = null;
-            this.SetupDirectory(path);
+            SetupDirectory(path);
         }
 
-        public DirectoryNode GetProduct()
+        public abstract void AddFiles();
+        public abstract void AddSubDirectories();
+
+
+        public virtual IDirectoryNode GetProduct()
         {
             if (this.directory is null)
                 throw new Exception("No product has been built yet.");

@@ -1,15 +1,22 @@
-﻿using Checksums.FileStructure.Visitors;
+﻿using Checksums.FileStructureVisitors;
 
 namespace Checksums.FileStructure
 {
-    public class FileNode : FileNodeBase
+    public class FileNode : IFileNode
     {
-        public FileNode(string path, ulong size) : base(path, size)
-        { }
+        protected string path;
+        protected ulong size;
 
-        public string Extension { get => System.IO.Path.GetExtension(this.path) ?? string.Empty; }
+        public FileNode(string path, ulong size = 0)
+        {
+            this.path = path;
+            this.size = size;
+        }
 
-        public override void Accept(FileNodeVisitorBase visitor)
+        public string Path { get => this.path; }
+        public ulong Size { get => this.size; }
+
+        public virtual void Accept(IFileStructureVisitor visitor)
         {
             visitor.Visit(this);
         }

@@ -8,26 +8,26 @@ namespace Checksums.ChecksumCalculators
         public const string unsupportedHashAlgorithmExceptionMessage = "Unsupported hash algorithm.";
         private const int KB = 1024;
 
-        private List<string> supportedHashAlgorithms;
+        private List<string> supportedHashAlgorithms = new List<string> { "SHA1", "SHA256", "SHA384", "SHA512", "MD5" };
         private int hashAlgorithmIndex;
         private EventWaitHandle? waitHandle;
 
         public CommonChecksumCalculator(string hashAlgorithm, EventWaitHandle? waitHandle = null)
         {
-            this.supportedHashAlgorithms = new List<string> { "SHA1", "SHA256", "SHA384", "SHA512", "MD5" };
             if (!this.supportedHashAlgorithms.Contains(hashAlgorithm))
-                throw new ArgumentException(unsupportedHashAlgorithmExceptionMessage);
+                throw new ArgumentException(CommonChecksumCalculator.unsupportedHashAlgorithmExceptionMessage);
+
             this.hashAlgorithmIndex = this.supportedHashAlgorithms.IndexOf(hashAlgorithm);
             this.waitHandle = waitHandle;
         }
 
-        public string Calculate(Stream inputStream)
+        public string Calculate(System.IO.Stream inputStream)
         {
             string result = string.Empty;
             using (HashAlgorithm algorithm = this.GetHashAlgorithm())
             {
                 int bytesRead = 0;
-                byte[] buffer = new byte[KB];
+                byte[] buffer = new byte[CommonChecksumCalculator.KB];
                 while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
                     if (this.waitHandle is not null)
@@ -36,14 +36,14 @@ namespace Checksums.ChecksumCalculators
                     algorithm.TransformBlock(buffer, 0, bytesRead, buffer, 0);
 
                     // Notify on last block and for every 5 KBs read
-                    if (bytesRead < KB || inputStream.Position % (5 * KB) == 0)
+                    if (bytesRead < buffer.Length || inputStream.Position % (5 * CommonChecksumCalculator.KB) == 0)
                         this.Notify(inputStream.Position);
                 }
                 algorithm.TransformFinalBlock(buffer, 0, 0);
                 byte[] hash = algorithm.Hash ?? new byte[0];
 
                 if (hash.Length > 0)
-                    result = BitConverter.ToString(hash).Replace("-", "");
+                    result = System.BitConverter.ToString(hash).Replace("-", "");
             }
 
             return result;
@@ -64,7 +64,7 @@ namespace Checksums.ChecksumCalculators
                 case "MD5":
                     return MD5.Create();
                 default:
-                    throw new ArgumentException(unsupportedHashAlgorithmExceptionMessage);
+                    throw new ArgumentException(CommonChecksumCalculator.unsupportedHashAlgorithmExceptionMessage);
             }
         }
     }

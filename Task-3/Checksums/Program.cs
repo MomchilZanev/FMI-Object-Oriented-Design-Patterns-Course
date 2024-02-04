@@ -1,7 +1,7 @@
 ﻿using Checksums.ChecksumCalculators;
+using Checksums.DirectoryStructureBuilders;
 using Checksums.FileStructure;
-using Checksums.FileStructure.Builders;
-using Checksums.FileStructure.Visitors;
+using Checksums.FileStructureVisitors;
 using Checksums.Progress;
 
 namespace Checksums
@@ -27,29 +27,34 @@ namespace Checksums
             Console.WriteLine("Display report? (Y/N)");
             bool displayReport = (Console.ReadLine() ?? string.Empty).Trim().ToLower() == "y";
 
-            DirectoryStructureBuilderBase directoryStructureBuilder = ignoreLinks ?
+            IDirectoryStructureBuilder directoryStructureBuilder = ignoreLinks ?
                 new IgnoreLinksDirectoryStructureBuilder() :
                 new RespectLinksDirectoryStructureBuilder();
             directoryStructureBuilder.SetupDirectory(directoryToScan);
             directoryStructureBuilder.AddFiles();
             directoryStructureBuilder.AddSubDirectories();
-            FileNodeBase directory = directoryStructureBuilder.GetProduct();
+            IDirectoryNode directory = directoryStructureBuilder.GetProduct();
 
             if (displayReport)
             {
-                FileNodeVisitorBase reportWriterVisitor = new ReportWriterVisitor(directoryToScan);
+                IFileStructureVisitor reportWriterVisitor = new ReportWriterVisitor(directoryToScan);
                 directory.Accept(reportWriterVisitor);
             }
 
-            File.Create(outputFile).Close();
-            using (FileStream outputFileStream = File.Open(outputFile, FileMode.Open))
+            System.IO.File.Create(outputFile).Close();
+            using (System.IO.FileStream outputFileStream = System.IO.File.Open(outputFile, FileMode.Open))
             {
-                ProgressReporter progressReporter = new ProgressReporter(directory.Size);
-                FileNodeVisitorBase hashStreamWriterVisitor = new HashStreamWriterVisitor(directoryToScan, new StreamWriter(outputFileStream), new CommonChecksumCalculator(hashAlgorithm, waitHandle), waitHandle);
-                hashStreamWriterVisitor.Subscribe(progressReporter);
+                IFileStructureVisitor hashStreamWriterVisitor = new HashStreamWriterVisitor(
+                    directoryToScan,
+                    new StreamWriter(outputFileStream),
+                    new CommonChecksumCalculator(hashAlgorithm, waitHandle),
+                    waitHandle);
+                if (hashStreamWriterVisitor is IObservable)
+                    ((IObservable)hashStreamWriterVisitor).Subscribe(new ProgressReporter(directory.Size));
 
-                Thread scanThread = new Thread(() => directory.Accept(hashStreamWriterVisitor));
+                System.Threading.Thread scanThread = new System.Threading.Thread(() => directory.Accept(hashStreamWriterVisitor));
                 scanThread.Start();
+
                 bool running = true;
                 while (scanThread.IsAlive)
                 {

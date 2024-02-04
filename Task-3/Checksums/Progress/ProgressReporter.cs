@@ -2,7 +2,7 @@
 
 namespace Checksums.Progress
 {
-    public class ProgressReporter : Observer
+    public class ProgressReporter : IObserver
     {
         private ulong totalBytesExpected;
         private ulong totalBytesRead;
@@ -21,6 +21,29 @@ namespace Checksums.Progress
             this.bytesReadSinceТicking = 0;
         }
 
+        public double Completion { get => (double)this.totalBytesRead / (double)this.totalBytesExpected; }
+        public TimeSpan ETA
+        {
+            get
+            {
+                ulong bytesRemaining = this.totalBytesExpected - this.totalBytesRead;
+                double bytesPerMillisecond = this.bytesReadSinceТicking / this.stopwatch.Elapsed.TotalMilliseconds;
+                double remainingMilliseconds = bytesRemaining / bytesPerMillisecond;
+
+                TimeSpan eta;
+                try
+                {
+                    eta = TimeSpan.FromMilliseconds(remainingMilliseconds);
+                }
+                catch (Exception)
+                {
+                    eta = TimeSpan.FromHours(23).Add(TimeSpan.FromMinutes(59).Add(TimeSpan.FromSeconds(59)));
+                }
+
+                return eta;
+            }
+        }
+
         public void Update(object message)
         {
             if (message is string)
@@ -37,48 +60,45 @@ namespace Checksums.Progress
                 this.currentFileBytesRead = (long)message;
             }
             else
-                throw new ArgumentException("Unexpected message");
+                throw new ArgumentException("Unexpected message.");
 
-            RefreshDisplay();
+            this.RefreshStopwatch();
+            this.RefreshDisplay();
         }
 
-        private void RefreshDisplay()
+        // Refresh ETA time sample roughly every 10 seconds
+        private void RefreshStopwatch()
         {
-            // Refresh ETA time sample every 10 seconds
             if (!this.stopwatch.IsRunning || this.stopwatch.Elapsed.TotalSeconds > 10)
             {
                 this.stopwatch.Restart();
                 this.bytesReadSinceТicking = 0;
             }
+        }
 
-            double completion = (double)totalBytesRead / (double)totalBytesExpected;
+        private void RefreshDisplay()
+        {
+            Console.SetCursorPosition(0, Console.CursorTop - 2); // Overwrite last progress line
 
-            ulong bytesRemaining = this.totalBytesExpected - this.totalBytesRead;
-            double bytesPerMillisecond = this.bytesReadSinceТicking / this.stopwatch.Elapsed.TotalMilliseconds;
-            double remainingMilliseconds = bytesRemaining / bytesPerMillisecond;
+            string processingLine = string.Format("Processing: {0}... {1} byte(s) read", this.currentFile, this.currentFileBytesRead);
+            string progressLine = string.Format("Progress: {0:P2} done, ETA: {1:hh\\:mm\\:ss}", this.Completion, this.ETA);
 
-            TimeSpan? remainingTime = null;
-            try
-            {
-                remainingTime = TimeSpan.FromMilliseconds(remainingMilliseconds);
-            }
-            catch (Exception)
-            {
-                remainingTime = TimeSpan.FromHours(23).Add(TimeSpan.FromMinutes(59).Add(TimeSpan.FromSeconds(59)));
-            }
+            // Compensate for console word wrap
+            processingLine = processingLine.Substring(0, int.Min(Console.BufferWidth, processingLine.Length));
+            progressLine = progressLine.Substring(0, int.Min(Console.BufferWidth, progressLine.Length));
 
-            Console.SetCursorPosition(0, Console.CursorTop - 1); // Overwrite progress line
-            Console.Write(string.Format("\rProcessing: {0}... {1} byte(s) read{2}Progress: {3:P2} done, ETA: {4:hh\\:mm\\:ss}",
-                this.currentFile,
-                this.currentFileBytesRead,
-                Environment.NewLine,
-                completion,
-                remainingTime));
+            Console.WriteLine(processingLine);
+            Console.WriteLine(progressLine);
         }
 
         public override bool Equals(object? other)
         {
             return other is null ? false : other is ProgressReporter;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.GetType().Name.GetHashCode();
         }
     }
 }

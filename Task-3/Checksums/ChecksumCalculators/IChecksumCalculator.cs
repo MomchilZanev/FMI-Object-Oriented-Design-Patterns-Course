@@ -2,6 +2,6 @@
 {
     public interface IChecksumCalculator
     {
-        public string Calculate(Stream inputStream);
+        string Calculate(System.IO.Stream inputStream);
     }
 }

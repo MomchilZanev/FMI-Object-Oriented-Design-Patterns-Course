@@ -1,7 +1,7 @@
 using Checksums.ChecksumCalculators;
+using Checksums.DirectoryStructureBuilders;
 using Checksums.FileStructure;
-using Checksums.FileStructure.Builders;
-using Checksums.FileStructure.Visitors;
+using Checksums.FileStructureVisitors;
 using System.Diagnostics;
 using System.Text;
 
@@ -10,12 +10,12 @@ namespace Tests
     [TestClass]
     public class HashStreamWriterVisitorTests
     {
-        private static string testDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Test Directory");
+        private static string testDirectory = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Test Directory");
 
         [TestInitialize]
         public void CheckEnvironment()
         {
-            if (!Directory.Exists(testDirectory) || !Directory.EnumerateFiles(testDirectory).Any())
+            if (!System.IO.Directory.Exists(testDirectory) || !System.IO.Directory.EnumerateFiles(testDirectory).Any())
             {
                 throw new DirectoryNotFoundException("Test environment has not been set up.");
             }
@@ -29,26 +29,26 @@ namespace Tests
         [DataRow("MD5")]
         public void IgnoreLinksTest(string hashAlgorithm)
         {
-            string startingDirectory = Path.Combine(testDirectory, "Starting Directory");
+            string startingDirectory = System.IO.Path.Combine(testDirectory, "Starting Directory");
             Dictionary<string, string> expectedHashedFiles = this.getDirectoryFileHash(startingDirectory, hashAlgorithm)
-                                                            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                                                            .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                                            .ToDictionary(tokens => tokens[0], tokens => Path.GetRelativePath(startingDirectory, tokens[1]));
+                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .ToDictionary(tokens => tokens[0], tokens => Path.GetRelativePath(startingDirectory, tokens[1]));
 
-            DirectoryStructureBuilderBase respectLinksDirectoryStructureBuilder = new IgnoreLinksDirectoryStructureBuilder();
-            respectLinksDirectoryStructureBuilder.SetupDirectory(startingDirectory);
-            respectLinksDirectoryStructureBuilder.AddFiles();
-            respectLinksDirectoryStructureBuilder.AddSubDirectories();
-            FileNodeBase directory = respectLinksDirectoryStructureBuilder.GetProduct();
+            IDirectoryStructureBuilder ignoreLinksDirectoryStructureBuilder = new IgnoreLinksDirectoryStructureBuilder();
+            ignoreLinksDirectoryStructureBuilder.SetupDirectory(startingDirectory);
+            ignoreLinksDirectoryStructureBuilder.AddFiles();
+            ignoreLinksDirectoryStructureBuilder.AddSubDirectories();
+            IDirectoryNode directory = ignoreLinksDirectoryStructureBuilder.GetProduct();
 
-            MemoryStream memoryStream = new MemoryStream();
-            FileNodeVisitorBase reportWriterVisitor = new HashStreamWriterVisitor(startingDirectory, new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
+            System.IO.MemoryStream memoryStream = new System.IO.MemoryStream();
+            IFileStructureVisitor hashStreamWriterVisitor = new HashStreamWriterVisitor(startingDirectory, new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
 
-            directory.Accept(reportWriterVisitor);
+            directory.Accept(hashStreamWriterVisitor);
 
             List<string> results = Encoding.UTF8.GetString(memoryStream.ToArray(), 0, (int)memoryStream.Length)
-                                                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                                                .ToList();
+                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
 
             Assert.AreEqual(expectedHashedFiles.Count, results.Count);
             Assert.IsTrue(expectedHashedFiles.All(kvp => results.Contains(string.Format("{0} {1}", kvp.Key, kvp.Value))));
@@ -64,25 +64,25 @@ namespace Tests
         {
             string startingDirectory = Path.Combine(testDirectory, "Starting Directory");
             Dictionary<string, string> expectedHashedFiles = this.getDirectoryFileHash(testDirectory, hashAlgorithm)
-                                                            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                                                            .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                                            .Where(tokens => Path.GetExtension(tokens[1]).ToLower() != ".lnk")
-                                                            .ToDictionary(tokens => tokens[0], tokens => Path.GetRelativePath(startingDirectory, tokens[1]));
+                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+                .Select(row => row.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .Where(tokens => Path.GetExtension(tokens[1]).ToLower() != ".lnk")
+                .ToDictionary(tokens => tokens[0], tokens => Path.GetRelativePath(startingDirectory, tokens[1]));
 
-            DirectoryStructureBuilderBase respectLinksDirectoryStructureBuilder = new RespectLinksDirectoryStructureBuilder();
+            IDirectoryStructureBuilder respectLinksDirectoryStructureBuilder = new RespectLinksDirectoryStructureBuilder();
             respectLinksDirectoryStructureBuilder.SetupDirectory(startingDirectory);
             respectLinksDirectoryStructureBuilder.AddFiles();
             respectLinksDirectoryStructureBuilder.AddSubDirectories();
-            FileNodeBase directory = respectLinksDirectoryStructureBuilder.GetProduct();
+            IDirectoryNode directory = respectLinksDirectoryStructureBuilder.GetProduct();
 
-            MemoryStream memoryStream = new MemoryStream();
-            FileNodeVisitorBase reportWriterVisitor = new HashStreamWriterVisitor(startingDirectory, new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
+            System.IO.MemoryStream memoryStream = new System.IO.MemoryStream();
+            IFileStructureVisitor hashStreamWriterVisitor = new HashStreamWriterVisitor(startingDirectory, new StreamWriter(memoryStream), new CommonChecksumCalculator(hashAlgorithm));
 
-            directory.Accept(reportWriterVisitor);
+            directory.Accept(hashStreamWriterVisitor);
 
             List<string> results = Encoding.UTF8.GetString(memoryStream.ToArray(), 0, (int)memoryStream.Length)
-                                                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                                                .ToList();
+                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
 
             Assert.AreEqual(expectedHashedFiles.Count, results.Count);
             Assert.IsTrue(expectedHashedFiles.All(kvp => results.Contains(string.Format("{0} {1}", kvp.Key, kvp.Value))));
@@ -95,7 +95,9 @@ namespace Tests
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = "PowerShell.exe";
             startInfo.Arguments = string.Format("-ExecutionPolicy Bypass -File \"{0}\" -Path \"{1}\" -Algorithm {2}",
-                Path.Combine(Directory.GetCurrentDirectory(), "Get-Directory-FileHash.ps1"), directoryPath, hashAlgorithm);
+                Path.Combine(Directory.GetCurrentDirectory(), "Get-Directory-FileHash.ps1"),
+                directoryPath,
+                hashAlgorithm);
             startInfo.RedirectStandardOutput = true;
             startInfo.UseShellExecute = false;
 

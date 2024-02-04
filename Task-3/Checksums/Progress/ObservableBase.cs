@@ -1,15 +1,15 @@
 ﻿namespace Checksums.Progress
 {
-    public abstract class ObservableBase
+    public abstract class ObservableBase : IObservable
     {
-        protected List<Observer> subscribers;
+        protected List<IObserver> subscribers;
 
         public ObservableBase()
         {
-            this.subscribers = new List<Observer>();
+            this.subscribers = new List<IObserver>();
         }
 
-        public virtual void Subscribe(Observer subscriber)
+        public virtual void Subscribe(IObserver subscriber)
         {
             if (!this.subscribers.Contains(subscriber))
             {
@@ -17,7 +17,7 @@
             }
         }
 
-        public virtual void Unsubscribe(Observer subscriber)
+        public virtual void Unsubscribe(IObserver subscriber)
         {
             if (this.subscribers.Contains(subscriber))
             {
@@ -27,7 +27,7 @@
 
         public virtual void Notify(object message)
         {
-            foreach (Observer subscriber in this.subscribers)
+            foreach (IObserver subscriber in this.subscribers)
             {
                 subscriber.Update(message);
             }
